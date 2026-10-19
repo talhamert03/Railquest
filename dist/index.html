@@ -7,14 +7,13 @@
   <meta name="description" content="58 özgün ray bulmacası. Altı vagon, anahtarlı bariyerler, hassas köprüler ve canlı adalar. Telefon için tasarlanmış tatlı bir tren yolculuğu.">
   <title>Railquest — Anahtarların Yolculuğu</title>
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./mobile-menu.css">
-  <link rel="stylesheet" href="./game-layout.css">
+  <link rel="preload" href="./assets/rubik-bold.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="./ui.css">
 </head>
 <body>
-  <div class="loading-screen" id="loading-screen" aria-label="Oyun yükleniyor"><div class="loading-layout"><img class="loading-art" src="./assets/cover.webp" alt="Küçük tren adası" width="1024" height="1024" fetchpriority="high"><div class="loading-copy"><span class="eyebrow">KÜÇÜK BİR YOLCULUK</span><h1>Railquest</h1><p id="loading-status" role="status">Adalar yolculuğa hazırlanıyor…</p><div class="loading-meter"><progress id="loading-progress" max="100" value="0" aria-label="Oyun hazırlığı"></progress><strong id="loading-percent" aria-hidden="true">0%</strong></div><button class="button button-green" id="loading-retry" hidden>Yeniden dene</button></div></div></div>
+  <div class="loading-screen" id="loading-screen" aria-label="Oyun yükleniyor"><div class="loading-layout"><div class="loading-art-wrap"><img class="loading-art" src="./assets/cover.webp" alt="Küçük tren adası" width="1024" height="1024" fetchpriority="high"></div><div class="loading-copy"><span class="eyebrow">KÜÇÜK BİR YOLCULUK</span><h1>Railquest</h1><p id="loading-status" role="status">Adalar yolculuğa hazırlanıyor…</p><div class="loading-meter"><div class="loading-track"><progress id="loading-progress" max="100" value="0" aria-label="Oyun hazırlığı"></progress><span class="loading-train" aria-hidden="true"><svg viewBox="0 0 40 28" width="40" height="28"><path d="M4 8h16v13H4z" fill="#3f8256"/><path d="M20 12h12l4 5v4H20z" fill="#e9a83a"/><path d="M8 3h5v5H8z" fill="#c4644a"/><rect x="6" y="11" width="5" height="4" rx="1" fill="#fff8e6"/><rect x="13" y="11" width="5" height="4" rx="1" fill="#fff8e6"/><circle cx="9" cy="23" r="3.2" fill="#24493f"/><circle cx="18" cy="23" r="3.2" fill="#24493f"/><circle cx="29" cy="23" r="3.2" fill="#24493f"/></svg></span></div><strong id="loading-percent" aria-hidden="true">0%</strong></div><button class="button button-green" id="loading-retry" hidden>Yeniden dene</button></div></div></div>
   <main id="app"></main>
-  <div class="rotate-screen" id="rotate-screen" role="status"><div class="rotate-phone" aria-hidden="true"></div><h2>Yolculuğu yatay çevir.</h2><p>Railquest yatay oynanır.<br>Telefonunu veya tabletini yana çevir.</p></div>
+  <div class="rotate-screen" id="rotate-screen" role="status"><div class="rotate-phone" aria-hidden="true"><span></span></div><h2>Yolculuğu yatay çevir.</h2><p>Railquest yatay oynanır.<br>Telefonunu veya tabletini yana çevir.</p></div>
   <noscript>Railquest’i oynamak için tarayıcında JavaScript'i etkinleştir.</noscript>
   <div id="announcer" class="sr-only" aria-live="polite"></div>
   <script type="module" src="./js/boot.js"></script>

@@ -8,7 +8,7 @@ export const worlds=[
  {id:1,name:'Kum Denizi',icon:'sun',biome:'desert',weather:'dust',subtitle:'Kaktüsler, serin vahalar ve usulca esen kumlar.',water:'#98d1cc',grass:'#edcb95',grassLight:'#f7ddb0',sand:'#ca9969',bank:'#b78458',detail:'#c59865',blocker:'#c79a66'},
  {id:2,name:'Kar İstasyonları',icon:'snow',biome:'snow',weather:'snow',subtitle:'Kar yüklü çamlar, sıcak kulübeler ve altıncı yolcu.',water:'#bbd4df',grass:'#e7eff1',grassLight:'#f8faf5',sand:'#afc6cd',bank:'#91afbd',detail:'#b9cdd3',blocker:'#749797'},
  {id:3,name:'Zaman Bahçeleri',icon:'clock',biome:'clock',weather:'glow',subtitle:'Bakır saatler, mor bahçeler ve yeşili yakalayan vagonlar.',water:'#c7c2d8',grass:'#dbcfbf',grassLight:'#efdfc9',sand:'#b3987d',bank:'#9f846f',detail:'#b7a0a9',blocker:'#a086aa'},
- {id:4,name:'Kızıl Kanyon',icon:'sun',biome:'desert',weather:'dust',subtitle:'Kızıl kayalıklar arasında kervanın ritmini bul.',water:'#dcbd9f',grass:'#dfaf7e',grassLight:'#f1c99c',sand:'#b87959',bank:'#a16b51',detail:'#bf875c',blocker:'#b77d58'},
+ {id:4,name:'Kızıl Kanyon',icon:'mountain',biome:'desert',weather:'dust',subtitle:'Kızıl kayalıklar arasında kervanın ritmini bul.',water:'#dcbd9f',grass:'#dfaf7e',grassLight:'#f1c99c',sand:'#b87959',bank:'#a16b51',detail:'#bf875c',blocker:'#b77d58'},
  {id:5,name:'Buzul Geçitleri',icon:'crystal',biome:'ice',weather:'frost',subtitle:'Mavi kristaller, buz kemerleri ve altı vagonluk son buluşma.',water:'#a3c9df',grass:'#b8dfe8',grassLight:'#d7f1f1',sand:'#87b6cf',bank:'#739ebf',detail:'#8ebccf',blocker:'#64acd0'}
 ];
 // Tunnels: [label, x1,y1,out1, x2,y2,out2]. Directions: E=0, S=1, W=2, N=3.

@@ -2,6 +2,17 @@
 
 Telefon ve tablet için yalnız yatay tasarlanan özgün tren bulmacası. 58 bölüm, altı bölge, sınırlı ray bütçesi, altıya kadar numaralı vagon, ortak hatlar, köprüler, A/B/C tünelleri, bekleme peronları, sinyaller ve tek yönlü geçitler.
 
+## Railquest — 0.10.0 · Mobil arayüz yenilemesi
+
+Bütün arayüz tek bir tasarım sistemine (`dist/ui.css`) taşındı; eski `styles.css`, `mobile-menu.css` ve `game-layout.css` kaldırıldı. Krem kâğıt paneller, basınca "çöken" oyuncak düğmeler ve yumuşak deniz renkleri her ekranda aynı dili konuşur.
+
+- **Yükleme:** Ada resmi yuvarlak maskeyle yüzer; ilerleme çubuğu bir ray, üstünde küçük bir tren gider.
+- **Ana menü:** Harf harf dalgalanan Railquest yazısı, sürüklenen bulutlar, parlayan Oyna düğmesi, hızlı ses düğmesi ve konuşma balonuyla Pati.
+- **Bölümler:** Duraklar raylarla bağlı yuvarlak jetonlar; tamamlananlar yeşil, sıradaki halka ile nabız atar, seçili olan işaretlenir. Bilet kartı delikli kenarlıdır. Bölge sekmeleri bölge rengini ve ilerlemeyi gösterir; dar ekranda yalnız seçili bölgenin adı yazılır. Kızıl Kanyon artık kendi dağ simgesini kullanır.
+- **Oyun ekranı:** Bölüm rozeti, kalan ray çubuğu (azalınca sarı, bitince mercan), vagon ve araç tepsileri, bağlanan vagonlarda onay işareti; mesajlar Pati'nin konuşma balonunda görünür. Başlat düğmesi duruma göre renk değiştirir.
+- **Pencereler:** Yatay telefonda kaydırma gerektirmeyen iki sütunlu düzenler: oyun menüsü (özet + 8 kutucuk), ayarlar, No Ads, ipucu, kazanma (konfeti, dönen ışık halesi, sırayla beliren yıldızlar). Uzun rehberlerde alt düğme yapışkan kalır.
+- 568×320'den 1366×1024'e kadar yatay ekranlarda denendi; Android sürüm kodu 13.
+
 ## Railquest — 0.9.3
 
 Alt ortada vagonlar, 1× / 2× ve hemen yanında − / + bulunur. Yakınlık düğmeleri oyun menüsünden buraya taşındı. Küçük ekranlarda yalnız vagon şeridi kayar. Android versionCode 12.
@@ -72,9 +83,10 @@ Web önizlemesi gerçek reklam göstermez veya ödeme almaz; No Ads denemesi otu
 - `dist/js/engine.js`: kurallar, bağımsız vagon simülasyonu, yol arama ve kayıt doğrulama.
 - `dist/js/expedition-blueprints.js`: 37–44 arasındaki yeni kanyon/buzul bulmacaları ve doğrulama yolları.
 - `dist/js/lock-blueprints.js`: 53–58, anahtar/bariyer ve hassas köprü bulmacaları.
-- `dist/game-layout.css`, `dist/js/viewport.js`: kullanılabilir ekran yüksekliği, mobil kontroller ve responsive oyun yerleşimi.
+- `dist/ui.css`: bütün ekranların tek tasarım sistemi (yükleme, menü, bölümler, oyun, pencereler).
+- `dist/js/viewport.js`: kullanılabilir ekran yüksekliği ve hareket koruması.
 - `dist/js/camera.js`, `board-gesture.js`: sınırlandırılmış kamera, yakınlık ve tek parmak pan/çizim ayrımı.
-- `dist/js/dialogs.js`, `mobile-menu.css`: mobil menü, ayar paneli ve modal yedeği.
+- `dist/js/dialogs.js`: ayar paneli ve modal yedeği.
 - `dist/js/key-signs.js`: vagon kimliğinden bağımsız, ortak anahtar/bariyer simgeleri.
 - `dist/js/vehicle-motion.js`: kurallardan bağımsız vagon hareketleri.
 - `dist/js/signal-blueprints.js`: 45–52, beş/altı vagonlu sinyal bulmacaları ve doğrulama yolları.
@@ -107,7 +119,7 @@ node scripts/check.mjs
 
 ## Android
 
-Android kaynak projesi 0.9.3 / versionCode 12 ve `sensorLandscape` kullanır. Gradle wrapper kaynaklara dahildir. Debug APK derleme ve imza kontrolleri `docs/RELEASE-READINESS.md` içinde kayıtlıdır. Gerçek Galaxy A36, tarayıcı CSS yerleşimi ve Play reklam/ödeme kabul testi henüz yapılmadı. Android Studio kurulum ayrıntıları `android/README.md` içindedir.
+Android kaynak projesi 0.10.0 / versionCode 13 ve `sensorLandscape` kullanır. Gradle wrapper kaynaklara dahildir. Debug APK derleme ve imza kontrolleri `docs/RELEASE-READINESS.md` içinde kayıtlıdır. Gerçek Galaxy A36, tarayıcı CSS yerleşimi ve Play reklam/ödeme kabul testi henüz yapılmadı. Android Studio kurulum ayrıntıları `android/README.md` içindedir.
 
 ## Görseller
 

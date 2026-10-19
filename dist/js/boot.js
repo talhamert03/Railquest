@@ -6,7 +6,7 @@ let running=false,moduleFailed=false;
 async function boot(){
  if(running)return;running=true;retry.hidden=true;
  let resources=0,moduleReady=0,mounted=0,failed=false;
- const update=()=>{if(failed)return;const value=Math.floor((resources+moduleReady+mounted)/(RESOURCE_COUNT+2)*100);bar.value=value;number.textContent=`${value}%`;status.textContent=value===100?'Yolculuk hazır.':'Adalar yolculuğa hazırlanıyor…';};
+ const update=()=>{if(failed)return;const value=Math.floor((resources+moduleReady+mounted)/(RESOURCE_COUNT+2)*100);bar.value=value;panel.style.setProperty('--progress',value/100);number.textContent=`${value}%`;status.textContent=value===100?'Yolculuk hazır.':'Adalar yolculuğa hazırlanıyor…';};
  update();
  try{
   const [art,game]=await Promise.all([prepareResources(p=>{resources=p.completed;update();}),import('./app.js').then(m=>{moduleReady=1;update();return m;}).catch(error=>{moduleFailed=true;throw error;})]);
