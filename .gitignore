@@ -1,0 +1,16 @@
+node_modules/
+android/.gradle/
+android/.idea/
+android/local.properties
+android/**/build/
+*.keystore
+*.jks
+*.aab
+*.apk
+*.zip
+*.tar.gz
+.DS_Store
+
+.env
+.env.*
+*-service-account*.json

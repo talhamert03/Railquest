@@ -1,0 +1,63 @@
+plugins { id 'com.android.application' }
+
+def rotaLiveAds = providers.gradleProperty('rotaLiveAds').orElse('false').get().toBoolean()
+def rotaAppId = providers.gradleProperty('rotaAdmobAppId').orElse('ca-app-pub-3940256099942544~3347511713').get()
+def rotaReward = providers.gradleProperty('rotaRewardedUnit').orElse('ca-app-pub-3940256099942544/5224354917').get()
+def rotaInterstitial = providers.gradleProperty('rotaInterstitialUnit').orElse('ca-app-pub-3940256099942544/1033173712').get()
+def rotaVerifier = providers.gradleProperty('rotaBillingVerifyUrl').orElse('').get()
+def rotaString = { value -> groovy.json.JsonOutput.toJson(value) }
+if(rotaLiveAds && [rotaAppId,rotaReward,rotaInterstitial].any { it.contains('3940256099942544') }) throw new GradleException('Live ads need your own AdMob app and unit IDs.')
+if(rotaVerifier && !(rotaVerifier ==~ /https:\/\/[^\s]+/)) throw new GradleException('Purchase verification requires your HTTPS endpoint.')
+
+android {
+    namespace 'com.rotaadalari.game'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'com.rotaadalari.game'
+        minSdk 26
+        targetSdk 36
+        versionCode 12
+        versionName '0.9.3'
+        manifestPlaceholders = [rotaAdmobAppId:rotaAppId]
+        buildConfigField 'String','BILLING_VERIFY_URL',rotaString(rotaVerifier)
+        buildConfigField 'boolean','ADS_ENABLED','false'
+        buildConfigField 'String','REWARDED_UNIT',rotaString(rotaReward)
+        buildConfigField 'String','INTERSTITIAL_UNIT',rotaString(rotaInterstitial)
+    }
+    buildFeatures { buildConfig true }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    sourceSets.main.assets.srcDir layout.buildDirectory.dir('generated/gameAssets')
+    buildTypes {
+        debug {
+            applicationIdSuffix '.dev'; versionNameSuffix '-dev'
+            manifestPlaceholders = [rotaAdmobAppId:'ca-app-pub-3940256099942544~3347511713']
+            buildConfigField 'boolean','ADS_ENABLED','true'
+            buildConfigField 'String','REWARDED_UNIT','"ca-app-pub-3940256099942544/5224354917"'
+            buildConfigField 'String','INTERSTITIAL_UNIT','"ca-app-pub-3940256099942544/1033173712"'
+        }
+        release {
+            buildConfigField 'boolean','ADS_ENABLED',rotaLiveAds.toString()
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Release signing is intentionally provided by the owner's upload key.
+        }
+    }
+}
+
+tasks.register('syncGameAssets', Sync) {
+    from rootProject.file('../dist')
+    into layout.buildDirectory.dir('generated/gameAssets/game')
+    exclude 'sw.js'
+}
+tasks.named('preBuild').configure { dependsOn 'syncGameAssets' }
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.14.0'
+    implementation 'com.google.android.gms:play-services-ads:25.4.0'
+    implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
+    implementation 'com.android.billingclient:billing:9.1.0'
+}

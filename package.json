@@ -1,0 +1,8 @@
+{
+  "name": "rota-adalari",
+  "version": "0.8.0",
+  "private": true,
+  "type": "module",
+  "description": "Özgün, çevrimdışı oynanabilen mobil tren bulmacası",
+  "scripts": { "test": "node --test tests/*.test.mjs", "check": "node scripts/check.mjs" }
+}
