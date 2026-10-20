@@ -6,7 +6,7 @@ Sürüm 0.14.0 · versionCode 17 · paket kimliği `com.rotaadalari.game` · 58 
 
 1. ZIP'in **tamamını** bir klasöre çıkart. `android` ile `dist` aynı üst klasörde kalmalı; Android projesi oyunu `../dist` klasöründen alır.
 2. Android Studio → **Open** → `Railquest/android` klasörünü seç (`app` alt klasörünü veya `index.html`'i açma).
-3. Gradle JDK olarak **17** veya üstü kullan (Settings → Build Tools → Gradle → Gradle JDK). SDK Manager'da **Android SDK Platform 36** kurulu olsun.
+3. Gradle 9.1 kullanılır; Gradle JDK olarak 17, 21 (Android Studio’nun kendi jbr-21’i) veya 25 çalışır. SDK Manager'da **Android SDK Platform 36** kurulu olsun.
 4. Gradle eşitlemesinin bitmesini bekle (ilk açılışta internet gerekir). İstersen önce telefonda **Run** ile dene; bu `.dev` uzantılı test sürümünü kurar.
 
 ## AAB oluştur (Play'e yüklenecek dosya)

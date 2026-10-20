@@ -11,22 +11,22 @@ Bu klasör, test APK’sı derlenebilen Android kaynak projesidir. Fiziksel ciha
 | Minimum Android | API 26 / Android 8.0; güncel Android System WebView gerekir |
 | Hedef / derleme SDK | API 36 |
 | Android Gradle Plugin | 8.13.0 |
-| Gradle | 8.13 |
-| JDK | 17 |
+| Gradle | 9.1.0 (Java 17–25 ile çalışır) |
+| JDK | 17, 21 veya 25 |
 | AndroidX WebKit | 1.14.0 |
-| Yayın sürümü | 0.9.3 / versionCode 12 |
+| Yayın sürümü | 0.14.0 / versionCode 17 |
 
 AGP ve araç sürümleri [resmî uyumluluk tablosuna](https://developer.android.com/build/releases/agp-8-13-0-release-notes) göre seçildi. Hedef API, [Google Play gereksinimine](https://developer.android.com/google/play/requirements/target-sdk) göre 36 olarak ayarlandı. Yerel içerik yöntemi [Android WebViewAssetLoader belgesini](https://developer.android.com/develop/ui/views/layout/webapps/load-local-content) izler.
 
 ## Android Studio ile derleme
 
-Android Studio’da bu klasörü açın; `../dist` yan klasörü korunmalıdır. Android SDK ve JDK 17 kurulu bir ortamda, bu klasör içinde:
+Android Studio’da bu klasörü açın; `../dist` yan klasörü korunmalıdır. Android SDK ve JDK 17 ya da üstü kurulu bir ortamda, bu klasör içinde:
 
 ```sh
 ./gradlew :app:assembleDebug
 ```
 
-Windows için `gradlew.bat :app:assembleDebug` kullanılır. Resmî Gradle 8.13 wrapper dosyaları kaynaklara dahildir. Wrapper JAR SHA-256 değeri doğrulandı; dağıtım özeti `gradle/wrapper/gradle-wrapper.properties` içinde sabittir. İlk senkronizasyon dağıtımı ve Android bağımlılıklarını indirir. Ayrı Gradle kurulumu gerekmez. 0.9.0 için JDK 17, Gradle 8.13 ve SDK 36 ile debug derlemesi başarıyla oluşturuldu; son doğrulama kaydı `../docs/RELEASE-READINESS.md` içindedir.
+Windows için `gradlew.bat :app:assembleDebug` kullanılır. Resmî Gradle wrapper dosyaları (dağıtım 9.1.0) kaynaklara dahildir. Wrapper JAR SHA-256 değeri doğrulandı; dağıtım özeti `gradle/wrapper/gradle-wrapper.properties` içinde sabittir. İlk senkronizasyon dağıtımı ve Android bağımlılıklarını indirir. Ayrı Gradle kurulumu gerekmez. 0.9.0 için JDK 17, Gradle 8.13 ve SDK 36 ile debug derlemesi başarıyla oluşturuldu; son doğrulama kaydı `../docs/RELEASE-READINESS.md` içindedir.
 
 `preBuild`, `../dist` dosyalarını otomatik olarak uygulama varlıklarına kopyalar. Böylece web ve Android sürümleri aynı kaynak kodunu kullanır. Android'de service worker kapalıdır; dosyalar zaten paket içindedir.
 
