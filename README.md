@@ -2,6 +2,12 @@
 
 Telefon ve tablet için yalnız yatay tasarlanan özgün tren bulmacası. 58 bölüm, altı bölge, sınırlı ray bütçesi, altıya kadar numaralı vagon, ortak hatlar, köprüler, A/B/C tünelleri, bekleme peronları, sinyaller ve tek yönlü geçitler.
 
+## Railquest — 0.14.0 · Yayına hazırlık
+
+- Müzik oyun açılınca başlar (Android'de dokunuş beklemez; tarayıcıda ilk dokunuşta başlar) ve uygulamaya dönünce kaldığı yerden sürer.
+- "Satın almayı geri yükle" düğmeleri kaldırıldı; satın almalar her açılışta Google Play'den kendiliğinden geri gelir.
+- Play Console kurulumu adım adım: `docs/PLAY-CONSOLE.md`. Android sürüm kodu 17.
+
 ## Railquest — 0.13.0 · Premium vagonlar
 
 10 vagon kaplaması yeniden tasarlandı: Altın Ekspres, Neon Gece, Gül Altını, Volkan, Zümrüt, Yakut Kraliyet, Sedef İnci, Galaksi, Buz Kristali ve Balkabağı Gecesi. Üstüne obje eklenmez; vagonun kendisi boyanır:
@@ -145,7 +151,7 @@ node scripts/check.mjs
 
 ## Android
 
-Android kaynak projesi 0.13.0 / versionCode 16 ve `sensorLandscape` kullanır. Gradle wrapper kaynaklara dahildir. Debug APK derleme ve imza kontrolleri `docs/RELEASE-READINESS.md` içinde kayıtlıdır. Gerçek Galaxy A36, tarayıcı CSS yerleşimi ve Play reklam/ödeme kabul testi henüz yapılmadı. Android Studio kurulum ayrıntıları `android/README.md` içindedir.
+Android kaynak projesi 0.14.0 / versionCode 17 ve `sensorLandscape` kullanır. Gradle wrapper kaynaklara dahildir. Debug APK derleme ve imza kontrolleri `docs/RELEASE-READINESS.md` içinde kayıtlıdır. Gerçek Galaxy A36, tarayıcı CSS yerleşimi ve Play reklam/ödeme kabul testi henüz yapılmadı. Android Studio kurulum ayrıntıları `android/README.md` içindedir.
 
 ## Görseller
 

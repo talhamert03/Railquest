@@ -69,7 +69,7 @@ Web ödeme almaz ve gerçek reklam göstermez. Ödüllü video, geçiş reklamı
 | 3 ekstra ray sonrası | Düğme gizlenir; ray bitince yalnız ortak hat / geri al önerilir |
 | 4. ve 8. tur | Sonuç ekranından önce geçiş reklamı; yüklenmezse sonuç ekranı |
 | Vagon satın al / iptal / bekleyen ödeme | Yalnız PURCHASED durumda açılır ve takılır |
-| Uygulamayı sil / yeniden yükle | Garaj → Satın alımları geri yükle aynı hesabın vagonlarını getirir |
+| Uygulamayı sil / yeniden yükle | Açılışta Play sorgulanır; aynı hesabın No Ads ve vagonları kendiliğinden geri gelir |
 | İade | Sonraki açılışta vagon klasiğe döner |
 | Debug APK | Paket `.dev` olduğu için Play ürünleri bulunmaz; satın alma testi dahili test kanalındaki imzalı sürümle yapılır |
 

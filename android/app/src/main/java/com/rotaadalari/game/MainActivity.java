@@ -79,7 +79,8 @@ public final class MainActivity extends Activity {
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        settings.setMediaPlaybackRequiresUserGesture(true);
+        // The menu music is generated with Web Audio and should start with the app, not after the first tap.
+        settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setSupportMultipleWindows(false);
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
