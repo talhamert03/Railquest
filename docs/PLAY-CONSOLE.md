@@ -44,7 +44,7 @@ Oyun fiyatı Play'den okur; Play'de ne yazarsan oyunda o görünür.
 - **Veri güvenliği:** Uygulama reklam (AdMob) ve uygulama içi satın alma içerir. AdMob'un cihaz kimliği ve reklam verisi topladığını beyan et.
 - **Reklam içerir:** Evet.
 - **Hedef kitle:** Çocukları kapsıyorsa Aile politikaları ve reklam kısıtlamaları devreye girer; 13+ seçmek reklam tarafını sadeleştirir.
-- **Gizlilik politikası adresi:** Zorunlu (reklam ve satın alma olduğu için). Metin hazır: `docs/privacy-policy.html` (İngilizce + Türkçe). İçindeki iki `CONTACT_EMAIL` yerine geliştirici e-postanı yaz, sayfayı herkese açık bir HTTPS adreste yayımla (Google Sites, Netlify Drop veya herkese açık bir GitHub reposunda GitHub Pages) ve adresi Play Console → Uygulama içeriği → Gizlilik politikası alanına gir.
+- **Gizlilik politikası adresi:** Zorunlu (reklam ve satın alma olduğu için). Metin hazır: `docs/privacy-policy.html` (İngilizce + Türkçe). Sayfa GitHub Pages ile yayında: https://talhamert03.github.io/Railquest/privacy-policy.html (Settings → Pages → Branch: `claude/inspiring-mayer-ggfpv1`, klasör `/docs`). Başka bir yerde yayımlamak istersen sayfayı herkese açık bir HTTPS adreste yayımla (Google Sites, Netlify Drop veya herkese açık bir GitHub reposunda GitHub Pages) ve adresi Play Console → Uygulama içeriği → Gizlilik politikası alanına gir.
 - **app-ads.txt:** Play'deki geliştirici web sitenin kök dizinine AdMob'un verdiği satırı içeren `app-ads.txt` koy.
 
 ## Kodda olanlar
