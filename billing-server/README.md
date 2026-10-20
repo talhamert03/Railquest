@@ -10,7 +10,7 @@ Node.js 22+ kaynak servisi; bu güncellemede barındırılmadı ve gerçek Googl
 | `PORT` | Varsayılan 8080; dış erişim HTTPS ingress üzerinden |
 | `PLAY_ALLOW_TEST_PURCHASES` | Varsayılan kapalı; kontrollü lisans testinde `true` |
 
-Çalıştırma: `node billing-server/server.mjs`. `GET /health`; `POST /verify` gövdesi yalnız `{"purchaseToken":"…"}`. Sunucu paket ve ürün kimliğini istemciden kabul etmez. Belirteç erişim sırrıdır; proxy/APM gövde ve Authorization kaydı kapalı tutulmalı.
+Çalıştırma: `node billing-server/server.mjs`. `GET /health`; `POST /verify` gövdesi `{"purchaseToken":"…","productId":"wagon_sakura"}`; `productId` yoksa `rota_plus` (No Ads) kabul edilir. Ürün kimliği yalnız `rota_plus` veya `wagon_*` olabilir; paket kimliği istemciden kabul edilmez. Belirteç erişim sırrıdır; proxy/APM gövde ve Authorization kaydı kapalı tutulmalı.
 
 Hizmet hesabına gerekli Play satın alma okuma/onay yetkilerini ver. JSON'u depoya, APK'ya veya statik dosyalara koyma. [Hizmet hesabı OAuth](https://developers.google.com/identity/protocols/oauth2/service-account), [satın alma sorgusu](https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.productsv2/getproductpurchasev2) ve [onay endpoint'i](https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.products/acknowledge) kullanılır.
 

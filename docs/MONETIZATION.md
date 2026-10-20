@@ -1,60 +1,76 @@
-# Gelir modeli — 0.4.0
+# Gelir modeli — 0.11.0
 
-Ücretsiz ana oyun, her beş tamamlanan turda bir otomatik reklam, reklamla otomatik çöz ve tek seferlik No Ads. Can, enerji, satın alınan ray veya ücretli bölüm yok. Beş bölüm sıklığı yayıncının tercihidir; Google zorunluluğu değildir.
+Ücretsiz ana oyun. Gelir dört yerden gelir: her dört tamamlanan turda bir otomatik geçiş reklamı, isteğe bağlı ödüllü videolar (ekstra ray ve otomatik çöz), tek seferlik No Ads ve tek seferlik vagon kozmetikleri. Can, enerji veya ücretli bölüm yok.
 
 | Akış | Davranış |
 |---|---|
-| Otomatik reklam | 5., 10., 15. tamamlanan turda, buluşma animasyonundan sonra ve sonuç ekranından önce kendiliğinden açılır |
-| Tekrar oynama | Aynı bölümü yeniden başlatıp tamamlamak da sayılır; başarısız denemeler sayılmaz |
-| Sayaç | Cihazda saklanır; yeniden açınca kaldığı yerden devam eder; yinelenen tamamlama aynı turu iki kez saymaz |
-| Reklam yüklenmezse | O fırsat atlanır, sonuç ekranı açılır; ilerleme veya yıldız silinmez |
-| Ücretsiz yardım | Sınırsız tek adım ipucu |
-| Otomatik çöz | Oyuncu her kullanımda ödüllü reklamı seçer; yalnız tamamlanma sonucunda o turdaki bütün raylar yerleşir ve vagonlar başlar |
-| İptal / kapanış / eski yanıt | Raylar değişmez; başka bölüme ait geç gelen ödül uygulanmaz |
-| Otomatik çözülen tur | Bölüm ilerlemesi kaydedilir; otomatik reklam sayacına eklenmez ve hemen ikinci reklam açılmaz |
-| No Ads | Tek seferlik satın alma; yalnız bölüm arası otomatik reklamları kaldırır |
-| No Ads ile otomatik çöz | Ödüllü reklam yine gereklidir; bu ayrım satın alma ekranında açıklanır |
-| Fiyat | Play Console'da belirlenecek; uygulama Google'ın yerelleştirilmiş fiyatını gösterir |
+| Otomatik reklam | 4., 8., 12. tamamlanan turda, buluşma animasyonundan sonra ve sonuç ekranından önce açılır |
+| Tekrar oynama | Aynı bölümü yeniden tamamlamak da sayılır; başarısız denemeler sayılmaz |
+| Sayaç | Cihazda saklanır. 0.10 öncesinden kalan dolu sayaç (4/5), güncellemeden sonraki ilk tamamlamada reklamı gösterir |
+| Reklam yüklenmezse | O fırsat atlanır, sonuç ekranı açılır |
+| Ücretsiz ipucu | Kaldırıldı |
+| Ekstra ray | Oyunun üst çubuğunda ve oyun menüsünde video rozetli **+3 ray** düğmesi. Tamamlanan her ödüllü video o bölümün ray hakkını 3 artırır; bölüm başına en fazla 3 kez. Ray bitince düğme nabız gibi atar. Kazanılan raylar bölüm bitene kadar kayıtta kalır |
+| Yıldızlar | Kullanılan ray yine bölümün hedefiyle (par) karşılaştırılır; ekstra rayla bitiren oyuncu doğal olarak daha az yıldız alır |
+| Otomatik çöz | Oyun menüsünde video rozetli kutucuk; yalnız tamamlanan ödüllü videoda bütün raylar yerleşir. Otomatik reklam sayacına eklenmez |
+| No Ads | Tek seferlik; yalnız otomatik geçiş reklamlarını kaldırır. Ödüllü videolar isteğe bağlı olarak sürer |
+| Vagon kozmetikleri | 10 tasarım, her biri ayrı tek seferlik ürün, hepsi aynı fiyat (24,99 TL). Garaj: ana menü → **Vagonlar** veya bölüm seçimi → **Vagonlar** |
 
-Eski hediye çözüm hakları ve bölüm bazında kalıcı çözüm açma sistemi kaldırıldı. Bölüm ilerlemesi, yıldızlar, ray taslakları ve ayarlar korunur. Yeni reklam sayacı güncellemede sıfırdan başlar.
+## Play Console ürünleri
 
-Ödüllü reklam açık onayla başlar ve reddeden oyuncu devam eder: [AdMob ödül politikası](https://support.google.com/admob/answer/7313578?hl=en). Geçiş reklamı doğal bölüm arası kullanır: [AdMob rehberi](https://developers.google.com/admob/android/interstitial). Banner veya açılış reklamı yoktur.
+Hepsi **tüketilmeyen** (one-time, non-consumable) uygulama içi ürün; satın alma seçeneği `buy`, kiralama veya ön sipariş yok. Vagonların fiyatı 24,99 TRY; diğer ülkeler için Play'in otomatik kur dönüşümü kullanılabilir. Uygulama her zaman Play'in yerelleştirilmiş fiyatını gösterir; Play'den fiyat gelmezse yedek etiket "24,99 ₺"tir.
 
-## Önizleme ve gerçek para akışı
+| Ürün kimliği | Görünen ad |
+|---|---|
+| `rota_plus` | No Ads |
+| `wagon_sakura` | Kiraz Çiçeği Vagonu |
+| `wagon_midnight` | Gece Ekspresi Vagonu |
+| `wagon_golden` | Altın Lüks Vagonu |
+| `wagon_mint` | Nane Şekeri Vagonu |
+| `wagon_lemon` | Limonata Vagonu |
+| `wagon_lavender` | Lavanta Vagonu |
+| `wagon_forest` | Orman Kulübesi Vagonu |
+| `wagon_ocean` | Okyanus Esintisi Vagonu |
+| `wagon_frost` | Buz Kristali Vagonu |
+| `wagon_halloween` | Balkabağı Gecesi Vagonu (Cadılar Bayramı) |
 
-Web ödeme almaz, gerçek reklam SDK'sı yüklemez. Tamamla/vazgeç önizlemesi çalışır. No Ads denemesi yalnız oturumluk olup satın alma sahipliği oluşturmaz. Otomatik çöz için her seferinde yeni bir ödül gerekir; döşenmiş raylar normal taslak olarak saklanır. Eski v2 kayıtları korunur.
+Kimlikler `dist/js/cosmetics.js` ve `BillingController.java` içinde aynıdır; `tests/billing.test.mjs` iki listenin eşleştiğini denetler.
 
-Android reklam/ödeme kaynakları eklendi; derleme ve cihaz kabulü yapılmadı. Debug yalnız test reklamı kullanır. Release reklamları kapalıdır; doğrulama adresi olmadan satın alma açılmaz. Bu kaynakların bulunması canlı gelir akışının hazır olduğunu göstermez.
+## Satın alma doğrulaması
 
-## Hesaplar hazır olduğunda
+- **Sunucusuz (varsayılan):** `rotaBillingVerifyUrl` boşsa satın alma cihazda Play Billing ile onaylanır (acknowledge) ve Play'in satın alma listesi esas alınır. Her açılışta ve uygulamaya dönüşte liste yeniden sorgulanır; iade edilen ürün kaldırılır. Çevrimdışı oyuncu sahipliğini 30 gün korur. Kök erişimli cihazlara karşı sunucu doğrulaması kadar güçlü değildir.
+- **Sunuculu:** `rotaBillingVerifyUrl` bir HTTPS `/verify` adresiyse her ürün `billing-server` üzerinden Google'a doğrulatılır ve sunucu onaylar. İstek `{purchaseToken, productId}` gönderir; eski sürümler `productId` göndermez ve No Ads kabul edilir.
 
-1. Kalıcı paket kimliğini belirle. Android `applicationId` ile sunucudaki `PLAY_PACKAGE_NAME` eşleşmeli. Debug `.dev` kimliğidir; satın alma testi doğru paket ve imzayla Play dahili kanalında yapılmalı.
-2. Play Console'da görünen adı **No Ads** olan tüketilmeyen INAPP ürünü `rota_plus` oluştur (mevcut ürün kimliği uyumluluk için korunur). Satın alma seçeneği `buy` olmalı; kiralama/ön sipariş kullanma. Fiyatlar ve ülkeler Console'da seçilir. Ürün tüketilmez.
-3. `billing-server/README.md` doğrultusunda HTTPS doğrulama servisini barındır. Play Developer API yetkili hizmet hesabı yalnız sunucuda tutulur. `rotaBillingVerifyUrl` Gradle özelliği servisin `/verify` adresidir.
-4. AdMob uygulamasını, ödüllü/geçiş birimlerini ve UMP mesajlarını yapılandır. Testler tamamlandığında Gradle özellikleri `rotaAdmobAppId`, `rotaRewardedUnit`, `rotaInterstitialUnit`, `rotaLiveAds=true` sağlanır. Test kimlikleriyle canlı reklam açılması derlemede reddedilir.
-5. İmzalı paketi Play dahili testinde lisans test hesaplarıyla doğrula. Test kartlarını kabul eden servis ayarı yalnız kontrollü test ortamında açık tutulmalı. Canlı doğrulayıcı bunları varsayılan olarak reddeder.
+Belirteçler loglanmaz veya JavaScript'e aktarılmaz. JavaScript yalnız sahip olunan ürün kimliklerini ve fiyat metinlerini görür.
 
-Satın alma ürün sorgusu, Google ödeme ekranı, sunucu doğrulaması ve onaydan geçer: [Play Billing rehberi](https://developer.android.com/google/play/billing/integrate). Bekleyen ödeme No Ads vermez; doğrulama hatasında oyuncu yeniden ödemeye yönlendirilmez. Google onayı ile istemci yanıtı arasında bağlantı koparsa sonraki geri yükleme aynı tüketilmeyen ürünü sağlar.
+## AdMob
 
-Belirteçler loglanmaz veya JavaScript'e aktarılmaz: [Play satın alma güvenliği](https://developer.android.com/google/play/billing/security). Android doğrulanmış sahipliği özel kayıtta tutar; çevrimdışı erişim korunur. Başarılı Play/sunucu sorgusu iptal veya iade gösterirse sahiplik silinir. Geçici ağ hatası eski doğrulanmış sahipliği silmez. Kök erişimli cihaz değişikliklerine karşı mutlak koruma iddiası yoktur.
+Yayın derlemesi `android/gradle.properties` içindeki kimlikleri kullanır:
 
-UMP, reklam etkinse No Ads sahiplerinde de her uygulama başlangıcında güncellenir; ödüllü reklamlar isteğe bağlı olarak kullanılabilir; `canRequestAds` izin vermeden reklam yüklenmez. Gerekliyse Ayarlar'dan gizlilik tercihleri yeniden açılır: [UMP rehberi](https://developers.google.com/admob/android/privacy). Geliştirmede [Google test reklamları](https://developers.google.com/admob/android/rewarded) kullanılır.
+| Ayar | Değer |
+|---|---|
+| `rotaAdmobAppId` | `ca-app-pub-1770141144744598~9051742862` |
+| `rotaInterstitialUnit` (Geçiş) | `ca-app-pub-1770141144744598/3590076356` |
+| `rotaRewardedUnit` (Ödüllü) | `ca-app-pub-1770141144744598/1927756309` |
+| `rotaLiveAds` | `true` |
 
-## Gerçek ortamda henüz geçilmemiş kabul matrisi
+Debug derlemesi her zaman Google'ın test birimlerini kullanır; kendi birimlerinde test tıklaması yapma. Yeni birimlerin reklam göstermesi bir saat kadar sürebilir. Geliştirici web sitende `app-ads.txt` yayımlanmalıdır.
+
+Ödüllü reklam açık onayla başlar ve reddeden oyuncu devam eder: [AdMob ödül politikası](https://support.google.com/admob/answer/7313578?hl=en). Geçiş reklamı doğal bölüm arası kullanır: [AdMob rehberi](https://developers.google.com/admob/android/interstitial). Banner veya açılış reklamı yoktur. UMP izni alınmadan reklam yüklenmez; gerekliyse Ayarlar'dan gizlilik tercihleri açılır.
+
+## Web önizlemesi
+
+Web ödeme almaz ve gerçek reklam göstermez. Ödüllü video, geçiş reklamı, No Ads ve vagon satın alma "önizleme" pencereleriyle denenir; açılan her şey yalnız o oturumda geçerlidir.
+
+## Yayından önce gerçek cihazda denenecekler
 
 | Durum | Beklenen |
 |---|---|
-| UMP izin / ret / form hatası | Oyun açık, reklamlar izin durumuna uygun |
-| Ödül tamamla / kapat / gösterim hatası | Yalnız kazanım callback'inde otomatik çöz; iptalde raylar aynı, çift ödül yok |
-| Reklam sırasında arka plan / uygulama kapanması | İlerleme korunur; dönüş ve sıklık kayıtları doğrulanır |
-| Satın alma onay / iptal / bekleme | Yalnız doğrulanan PURCHASED durumunda No Ads |
-| No Ads sahibi | Otomatik reklam yok; ödüllü reklam tamamlanırsa otomatik çöz var |
-| 5. ve 10. tur | Sonraki düğmesine basmadan reklam; yüklenmezse sonuç ekranı |
-| Çift dokunuş | Tek ödeme/reklam ekranı |
-| Sil / yeniden yükle | Satın alan Play hesabından geri yükleme |
-| İade / ağ veya servis hatası | Doğrulanan iade erişimi kaldırır; geçici hata eski satın almayı kaybettirmez |
-| AAB / R8 / gerçek telefon | Derleme, SDK ve JavaScript köprüsü çalışır |
+| Ekstra ray videosu tamamla / kapat | Tamamlanınca +3 ray; kapatılınca ray yok, hak harcanmaz |
+| 3 ekstra ray sonrası | Düğme gizlenir; ray bitince yalnız ortak hat / geri al önerilir |
+| 4. ve 8. tur | Sonuç ekranından önce geçiş reklamı; yüklenmezse sonuç ekranı |
+| Vagon satın al / iptal / bekleyen ödeme | Yalnız PURCHASED durumda açılır ve takılır |
+| Uygulamayı sil / yeniden yükle | Garaj → Satın alımları geri yükle aynı hesabın vagonlarını getirir |
+| İade | Sonraki açılışta vagon klasiğe döner |
+| Debug APK | Paket `.dev` olduğu için Play ürünleri bulunmaz; satın alma testi dahili test kanalındaki imzalı sürümle yapılır |
 
-Son Android paketi reklam ve Billing SDK'ları içerir; gizlilik ve Veri güvenliği beyanları eski reklamsız sürümden kopyalanamaz. Yayıncı iletişimi, gizlilik URL'si ve hedef kitle belirlenmeli. Hedef kitlenin çocukları kapsaması halinde yaşa uygun istek ayarları ve mağaza beyanları yayın öncesinde tamamlanmalıdır. Analitik SDK'sı eklenmedi.
-
-Aktif kullanıcı, ülke dağılımı veya reklam doluluğu bilinmediği için gelir tahmini verilmez. Oyuncu testlerinde bölüm süresi, çözüm ihtiyacı ve reklam sonrası ayrılma gözlemleriyle sıklık dengelenmeli. Bu plan otomasyon veya takip başlatmaz.
+Aktif kullanıcı ve reklam doluluğu bilinmediği için gelir tahmini verilmez.

@@ -1,5 +1,5 @@
 /** Bounded preload/decode pool. Progress counts completed preparation jobs, not a timer. */
-export const IMAGE_SOURCES=Object.freeze({cover:'./assets/cover.webp',props:'./assets/props-v2.webp',vehicles:'./assets/vehicles-v2.webp',conductor:'./assets/conductor.webp',biomesA:'./assets/biomes-desert-snow-v5.webp',biomesB:'./assets/biomes-glacier-clock-v5.webp'});
+export const IMAGE_SOURCES=Object.freeze({cover:'./assets/cover.webp',props:'./assets/props-v2.webp',vehicles:'./assets/vehicles-v2.webp',conductor:'./assets/conductor.webp',biomesA:'./assets/biomes-desert-snow-v5.webp',biomesB:'./assets/biomes-glacier-clock-v5.webp',skins:'./assets/wagon-skins.webp'});
 export const RESOURCE_COUNT=Object.keys(IMAGE_SOURCES).length+1;
 const decoded=new Map();
 function decodeImage(src){

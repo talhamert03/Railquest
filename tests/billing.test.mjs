@@ -26,3 +26,15 @@ test('verification outages fail closed, revoked tokens deny access and malformed
  assert.equal((await verify(valid(),{token:'bad',google:()=>{throw new Error('Must not call');}})).code,400);
  const data=valid();data.acknowledgementState='ACKNOWLEDGEMENT_STATE_PENDING';await assert.rejects(verify(data,{google:async(url,options)=>options?response({},503):response(data)}));
 });
+test('a wagon skin is verified and acknowledged under its own product id',async()=>{
+ const data=valid();data.productLineItem[0].productId='wagon_halloween';data.acknowledgementState='ACKNOWLEDGEMENT_STATE_PENDING';const calls=[];
+ const result=await verify(data,{productId:'wagon_halloween',google:async(url,options)=>{calls.push(url);return options?.method==='POST'?new Response(null,{status:204}):response(data);}});
+ assert.equal(result.body.entitled,true);assert.equal(result.body.productId,'wagon_halloween');assert.match(calls[1],/products\/wagon_halloween\/tokens\//);
+ assert.equal((await verify(data,{productId:'wagon_sakura'})).body.entitled,false);
+});
+test('the Android product list matches the skins sold in the game',async()=>{
+ const {readFile}=await import('node:fs/promises');const {SKIN_PRODUCTS,WAGON_SKINS}=await import('../dist/js/cosmetics.js');
+ const java=await readFile(new URL('../android/app/src/main/java/com/rotaadalari/game/BillingController.java',import.meta.url),'utf8');
+ const listed=[...java.match(/SKINS=Collections\.unmodifiableList\(Arrays\.asList\(([^)]*)\)/)[1].matchAll(/"([^"]+)"/g)].map(m=>m[1]);
+ assert.deepEqual(listed,SKIN_PRODUCTS);assert.equal(SKIN_PRODUCTS.length,10);assert.equal(new Set(WAGON_SKINS.map(s=>s.row)).size,WAGON_SKINS.length);
+});

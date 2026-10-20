@@ -92,3 +92,15 @@ test('No Ads owners must still complete a rewarded ad to auto-solve',async()=>{
  c.receive(requests[0].id,{status:'cancelled'});await Promise.resolve();c.receive(requests.at(-1).id,{status:'ok',noAds:true});
  const result=await reward;assert.equal(c.noAds,true);assert.equal(rewardedSolution(parseLevel(levels[0]),result,'a','a'),null);
 });
+test('skin ownership and prices come only from native status for known products',async()=>{
+ const requests=[],host={RotaCommerce:{request:(id,action)=>requests.push({id,action})}},c=new NativeCommerce(host);
+ c.previewOwned.add('wagon_mint');assert.equal(c.owns('wagon_mint'),false);
+ const refresh=c.refresh();c.receive(requests[0].id,{status:'ok',owned:['wagon_mint','wagon_fake',7],prices:{wagon_mint:'₺24,99',evil:'x'}});await refresh;
+ assert.equal(c.owns('wagon_mint'),true);assert.equal(c.owns('wagon_fake'),false);assert.deepEqual(c.state.prices,{wagon_mint:'₺24,99'});
+ const web=new NativeCommerce({});assert.equal(web.owns('wagon_mint'),false);web.previewOwned.add('wagon_mint');assert.equal(web.owns('wagon_mint'),true);
+});
+test('a stored skin choice survives reload but unknown skins fall back to classic',()=>{
+ const s=defaults();s.wagonSkin='halloween';assert.equal(normalizeSave(JSON.parse(JSON.stringify(s))).wagonSkin,'halloween');
+ assert.equal(normalizeSave({version:2,wagonSkin:'gold-hack'}).wagonSkin,'classic');
+ assert.deepEqual(normalizeSave({version:2,boosts:{1:6,2:4,99:3,3:12}}).boosts,{1:6});
+});

@@ -42,8 +42,11 @@ const server=createServer(async(request,response)=>{
   let size=0;const chunks=[];
   for await(const chunk of request){size+=chunk.length;if(size>8192){reply(response,413,{error:'request_too_large'});return;}chunks.push(chunk);}
   let data;try{data=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{reply(response,400,{error:'invalid_json'});return;}
-  if(!data||Array.isArray(data)||Object.keys(data).some(k=>k!=='purchaseToken')){reply(response,400,{error:'invalid_request'});return;}
-  const result=await verifyPurchase({token:data.purchaseToken,packageName,allowTest,google});reply(response,result.code,result.body);
+  if(!data||Array.isArray(data)||Object.keys(data).some(k=>k!=='purchaseToken'&&k!=='productId')){reply(response,400,{error:'invalid_request'});return;}
+  // No Ads and the wagon skins; older apps omit productId and mean No Ads.
+  const productId=data.productId??'rota_plus';
+  if(typeof productId!=='string'||!/^(rota_plus|wagon_[a-z]{2,20})$/.test(productId)){reply(response,400,{error:'invalid_request'});return;}
+  const result=await verifyPurchase({token:data.purchaseToken,packageName,productId,allowTest,google});reply(response,result.code,result.body);
  }catch{reply(response,503,{error:'verification_temporarily_unavailable'});}finally{inFlight--;}
 });
 server.requestTimeout=20000;server.headersTimeout=10000;

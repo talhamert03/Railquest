@@ -117,7 +117,7 @@ button:focus-visible,canvas:focus-visible,summary:focus-visible,input:focus-visi
 .menu-wordmark>span{display:inline-block;color:#fff3cc;-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 var(--ink),0 8px 0 rgba(36,73,63,.35),0 14px 18px rgba(36,73,63,.22);animation:letter-bob 3.2s ease-in-out infinite;animation-delay:calc(var(--i) * .11s)}
 .menu-wordmark>span:nth-child(n+5){color:#ffe08a}
 .menu-tagline{display:inline-block;margin:clamp(10px,3vh,20px) 0 clamp(12px,4vh,26px);padding:6px 14px;border-radius:30px;background:#fff8e6c9;border:1.5px solid #fffdf3;font-size:13px;font-weight:600;color:var(--ink-2);transform:rotate(-2deg)}
-.menu-controls{display:grid;grid-template-columns:minmax(0,1fr) var(--touch);gap:12px 10px;padding:0 6px}
+.menu-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 10px;padding:0 6px}
 .menu-play{--lip:5px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:clamp(62px,15vh,88px);min-width:0;padding:8px 12px;border-radius:24px;border:2px solid #fff2c4;background:linear-gradient(#ffe598,#f5bd4c);color:#4a3a17;box-shadow:0 var(--lip) 0 var(--sun-lip),0 calc(var(--lip) + 7px) 16px rgba(36,73,63,.22)}
 .menu-play::after{content:"";position:absolute;top:-20%;bottom:-20%;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-18deg);animation:shine 4.5s ease-in-out infinite;pointer-events:none}
 .menu-play:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 var(--sun-lip),0 3px 6px rgba(36,73,63,.18)}
@@ -132,6 +132,39 @@ button:focus-visible,canvas:focus-visible,summary:focus-visible,input:focus-visi
 .home-conductor{position:absolute;z-index:1;bottom:0;left:max(40%,calc(env(safe-area-inset-left) + 5% + clamp(230px,32vw,390px) + 12px));display:flex;align-items:flex-end;pointer-events:none}
 .home-conductor img{display:block;width:clamp(88px,26vh,150px);height:auto;margin-bottom:-6px;filter:drop-shadow(0 6px 8px rgba(36,73,63,.25));transform-origin:50% 100%;animation:wiggle 4s ease-in-out infinite}
 .home-conductor .speech{order:2;position:relative;align-self:flex-start;margin:4px 0 0 -6px;padding:7px 12px;border-radius:16px 16px 16px 4px;background:var(--cream);border:2px solid #fffdf2;box-shadow:0 3px 0 #8aa38a66;font-size:12px;font-weight:600;color:var(--ink-2);white-space:nowrap;animation:pop-in .5s .6s both cubic-bezier(.2,1.6,.4,1)}
+
+.menu-garage .icon{color:#c28630}
+.menu-secondary{font-size:15px;gap:7px;padding:8px 6px}
+.garage-chip{--lip:3px;display:flex;align-items:center;gap:6px;flex:none;min-height:42px;padding:6px 12px;border-radius:16px;border:2px solid #fff1c0;background:linear-gradient(var(--sun),var(--sun-2));box-shadow:0 var(--lip) 0 var(--sun-lip);font-size:13px;font-weight:700;color:var(--sun-ink);margin-left:auto}
+.garage-chip+.chapter-progress{margin-left:8px}
+.garage-chip .icon{width:20px;height:20px}
+.garage-chip:active{transform:translateY(2px);box-shadow:0 1px 0 var(--sun-lip)}
+
+/* ---------- Wagon garage ---------- */
+.garage-dialog{width:min(780px,calc(100% - 24px))}
+.garage-dialog .dialog-inner{padding:16px}
+.garage-layout{display:grid;grid-template-columns:minmax(200px,.8fr) minmax(0,1.5fr);gap:16px;align-items:stretch;text-align:center}
+.garage-stage{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;padding:16px 14px;border-radius:22px;background:radial-gradient(circle at 50% 38%,#fffdf3 0%,color-mix(in srgb,var(--accent) 30%,#fff8e6) 62%,color-mix(in srgb,var(--accent) 48%,#f4e6c4) 100%);background-color:#f4ead0;box-shadow:inset 0 0 0 2px #ffffffaa}
+.garage-wagon{display:block;margin:2px auto 0;filter:drop-shadow(0 10px 8px rgba(36,73,63,.28));animation:float-y 3s ease-in-out infinite}
+.garage-stage h2{margin:2px 0 0;font-size:21px}
+.garage-stage>p{margin:0 0 8px;font-size:12.5px;color:var(--ink-2)}
+.garage-stage>.button{width:100%;min-height:48px;font-size:15px}
+.garage-stage .preview-note{margin-top:6px}
+.garage-stage .shop-status{margin-top:8px;width:100%}
+.garage-stage:has(.season-tag){padding-top:38px}
+.season-tag{position:absolute;top:10px;left:10px;display:flex;align-items:center;gap:4px;padding:4px 9px;border-radius:12px;background:#2c2236;color:#ffb35c;font-size:11px;font-weight:700}
+.season-tag .icon{width:14px;height:14px}
+.garage-shelf{display:flex;flex-direction:column;min-width:0;text-align:left}
+.garage-shelf>.eyebrow{margin:6px 46px 10px 4px;color:#a0712c}
+.skin-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.skin-card{--lip:3px;position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 4px 6px;border-radius:16px;border:2px solid #fffdf2;background:linear-gradient(#fffaea,#efe6c9);box-shadow:0 var(--lip) 0 #c9bd96}
+.skin-card:active{transform:translateY(2px);box-shadow:0 1px 0 #c9bd96}
+.skin-card.selected{border-color:var(--accent);box-shadow:0 var(--lip) 0 #c9bd96,0 0 0 3px color-mix(in srgb,var(--accent) 55%,#fff);background:linear-gradient(#fffdf6,#fbf2d7)}
+.skin-thumb{display:block}
+.skin-card>small{display:flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--ink-2);white-space:nowrap}
+.skin-card>small .icon{width:12px;height:12px;stroke-width:3;color:var(--leaf-2)}
+.skin-card.equipped>small{color:var(--leaf-2)}
+.garage-shelf>.text-button{align-self:flex-start;margin-top:6px}
 
 /* ---------- Chapter / level selection ---------- */
 .chapter-screen{position:relative;height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;gap:8px;padding:max(10px,env(safe-area-inset-top)) max(var(--edge),env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(var(--edge),env(safe-area-inset-left));background:var(--sea)}
@@ -486,6 +519,7 @@ summary{cursor:pointer;padding:8px 2px;font-weight:600}
  .pause-grid{gap:8px;margin-top:44px}
  .pause-action{min-height:70px}
  .noads-ticket{min-height:170px}
+ .garage-stage>p{display:none}
  .win-dialog .dialog-inner{padding:16px 20px}
  .win-copy h2{font-size:26px}
  .win-stars .icon{width:34px;height:34px}
@@ -509,6 +543,8 @@ summary{cursor:pointer;padding:8px 2px;font-weight:600}
  .help-notes{grid-template-columns:1fr}
 }
 @media (max-width:700px){
+ .garage-chip>span{display:none}
+ .garage-chip{padding:6px 9px}
  .puzzle-wagons{gap:4px;padding-inline:5px}
  .wagon-button{width:34px}
  .wagon-button>span{font-size:17px}
@@ -540,6 +576,13 @@ summary{cursor:pointer;padding:8px 2px;font-weight:600}
  .puzzle-wagons,.dock-tools{padding:4px 5px 6px}
  .noads-ticket{min-height:140px;padding:14px 10px}
  .win-portrait{max-width:150px}
+ .garage-layout{grid-template-columns:minmax(170px,.7fr) minmax(0,1.5fr);gap:10px}
+ .garage-stage{padding:10px}
+ .garage-stage>p{display:none}
+ .garage-stage h2{font-size:17px;margin-bottom:6px}
+ .skin-grid{gap:6px}
+ .skin-card{padding:5px 3px 4px}
+ .menu-secondary{font-size:13px}
  .ticket-stars{display:none}
  .ticket-number{font-size:22px}
  .level-ticket h2{margin:4px 0 2px}

@@ -2,6 +2,16 @@
 
 Telefon ve tablet için yalnız yatay tasarlanan özgün tren bulmacası. 58 bölüm, altı bölge, sınırlı ray bütçesi, altıya kadar numaralı vagon, ortak hatlar, köprüler, A/B/C tünelleri, bekleme peronları, sinyaller ve tek yönlü geçitler.
 
+## Railquest — 0.11.0 · Garaj ve yeni gelir modeli
+
+- **Ekstra ray:** Ücretsiz ipucu kaldırıldı. Oyunun üst çubuğundaki video rozetli **+3 ray** düğmesi (ve oyun menüsündeki kutucuk) ödüllü videodan sonra o bölüme 3 ray ekler; bölüm başına en fazla 3 kez. Otomatik çöz oyun menüsünde videolu kutucuk olarak durur.
+- **Reklam sıklığı:** Otomatik geçiş reklamı artık her 4 tamamlanan bölümde bir.
+- **Vagon Garajı:** 10 yeni vagon tasarımı (biri Cadılar Bayramı'na özel, çatısında balkabağı feneriyle). Her biri tek seferlik 24,99 TL. Ana menü ve bölüm seçiminde **Vagonlar** düğmesi. Tasarımlar `scripts/build-wagon-skins.py` ile orijinal vagon çiziminden bölge bölge boyanarak üretilir (`dist/assets/wagon-skins.webp`).
+- **Satın alma:** Android tarafı No Ads ve 10 vagonu destekler. Doğrulama sunucusu adresi girilmemişse satın alma cihazda Play onayıyla tamamlanır.
+- **AdMob:** Yayın derlemesi kendi uygulama, geçiş ve ödüllü birim kimliklerini kullanır.
+- **Pencereler:** Yalnız içerik kayar, kapatma düğmesi hep yerinde kalır; Android'de sistem yazı boyutu oyun düzenini bozmaz.
+- Ayrıntılar ve Play Console ürün listesi: `docs/MONETIZATION.md`. Android sürüm kodu 14.
+
 ## Railquest — 0.10.0 · Mobil arayüz yenilemesi
 
 Bütün arayüz tek bir tasarım sistemine (`dist/ui.css`) taşındı; eski `styles.css`, `mobile-menu.css` ve `game-layout.css` kaldırıldı. Krem kâğıt paneller, basınca "çöken" oyuncak düğmeler ve yumuşak deniz renkleri her ekranda aynı dili konuşur.
@@ -119,7 +129,7 @@ node scripts/check.mjs
 
 ## Android
 
-Android kaynak projesi 0.10.0 / versionCode 13 ve `sensorLandscape` kullanır. Gradle wrapper kaynaklara dahildir. Debug APK derleme ve imza kontrolleri `docs/RELEASE-READINESS.md` içinde kayıtlıdır. Gerçek Galaxy A36, tarayıcı CSS yerleşimi ve Play reklam/ödeme kabul testi henüz yapılmadı. Android Studio kurulum ayrıntıları `android/README.md` içindedir.
+Android kaynak projesi 0.11.0 / versionCode 14 ve `sensorLandscape` kullanır. Gradle wrapper kaynaklara dahildir. Debug APK derleme ve imza kontrolleri `docs/RELEASE-READINESS.md` içinde kayıtlıdır. Gerçek Galaxy A36, tarayıcı CSS yerleşimi ve Play reklam/ödeme kabul testi henüz yapılmadı. Android Studio kurulum ayrıntıları `android/README.md` içindedir.
 
 ## Görseller
 

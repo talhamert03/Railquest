@@ -1,13 +1,16 @@
 import {levels} from './levels.js';
 import {economyDefaults,normalizeEconomy} from './monetization.js';
+import {WAGON_SKINS} from './cosmetics.js';
 const KEY='rota-adalari.save.v2',LEGACY='rota-adalari.save.v1',COUNT=levels.length;
-export const defaults=()=>({version:2,completed:{},lastLevel:1,hasStarted:false,drafts:{},boosts:{},economy:economyDefaults(),settings:{sound:true,music:true,haptics:true,weather:true,reducedMotion:typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches}});
+export const defaults=()=>({version:2,completed:{},lastLevel:1,hasStarted:false,drafts:{},boosts:{},wagonSkin:'classic',economy:economyDefaults(),settings:{sound:true,music:true,haptics:true,weather:true,reducedMotion:typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches}});
 const validId=id=>/^\d+$/.test(id)&&Number(id)>=1&&Number(id)<=COUNT;
 export function normalizeSave(raw){
  const out=defaults();if(!raw||typeof raw!=='object')return out;
  for(const k of Object.keys(out.settings))if(typeof raw.settings?.[k]==='boolean')out.settings[k]=raw.settings[k];
  if(raw.version!==2)return out;
  out.economy=normalizeEconomy(raw.economy);
+ // Only the choice is stored; ownership always comes from Play (or the session preview).
+ if(WAGON_SKINS.some(s=>s.id===raw.wagonSkin))out.wagonSkin=raw.wagonSkin;
  if(Number.isInteger(raw.lastLevel)&&raw.lastLevel>=1&&raw.lastLevel<=COUNT)out.lastLevel=raw.lastLevel;
  for(const [id,v] of Object.entries(raw.completed||{})){
   if(validId(id)&&v&&Number.isInteger(v.stars)&&v.stars>=1&&v.stars<=3&&Number.isInteger(v.rails)&&v.rails>=0&&v.rails<150)out.completed[id]={stars:v.stars,rails:v.rails};

@@ -1,5 +1,7 @@
 /** One interstitial opportunity after every four completed, unassisted rounds. */
 import {cloneRoutes,simulate} from './engine.js';
+import {SKIN_PRODUCTS} from './cosmetics.js';
+const PRODUCTS=new Set(['rota_plus',...SKIN_PRODUCTS]);
 export const AD_POLICY=Object.freeze({roundsPerAd:4,legacyRoundsPerAd:5});
 export const economyDefaults=()=>({version:4,roundsTowardAd:0});
 export function normalizeEconomy(raw){
@@ -30,17 +32,20 @@ export function rewardedSolution(level,result,requestedRound,currentRound){
 /** The native host resolves requests once. Late/duplicate ad callbacks cannot grant rewards. */
 export class NativeCommerce{
  constructor(host=globalThis){
-  this.host=host;this.native=typeof host.RotaCommerce?.request==='function';this.previewNoAds=false;this.state={noAds:false,rewardedReady:false,interstitialReady:false,billingReady:false,privacyRequired:false,price:null};this.pending=new Map();this.serial=0;this.busy=false;
+  this.host=host;this.native=typeof host.RotaCommerce?.request==='function';this.previewNoAds=false;this.previewOwned=new Set();this.state={noAds:false,rewardedReady:false,interstitialReady:false,billingReady:false,privacyRequired:false,price:null,owned:[],prices:{}};this.pending=new Map();this.serial=0;this.busy=false;
   if(this.native){host.rotaCommerceResult=(id,result)=>this.receive(id,result);host.addEventListener?.('rota-commerce-changed',()=>this.refresh());}
  }
  get noAds(){return this.native?this.state.noAds:this.previewNoAds;}
+ /** Skin ownership: Play-verified on Android, a session-only trial in the web preview. */
+ owns(product){return this.native?this.state.owned.includes(product):this.previewOwned.has(product);}
+ priceOf(product){return this.native?this.state.prices[product]||null:null;}
  receive(id,result){const p=this.pending.get(id);if(!p)return;this.pending.delete(id);clearTimeout(p.timer);p.resolve(result&&typeof result==='object'?result:{status:'error'});}
  request(action,timeoutMs=15000){
   if(!this.native)return Promise.resolve({status:'preview'});
   const id=`rota-${++this.serial}`;
   return new Promise(resolve=>{const timer=setTimeout(()=>{this.pending.delete(id);resolve({status:'unavailable'});},timeoutMs);this.pending.set(id,{resolve,timer});try{this.host.RotaCommerce.request(id,action);}catch{this.receive(id,{status:'unavailable'});}});
  }
- async refresh(){const result=await this.request('status');if(result.status==='ok'){const previous=JSON.stringify(this.state);for(const k of ['noAds','rewardedReady','interstitialReady','billingReady','privacyRequired'])this.state[k]=result[k]===true;this.state.price=typeof result.price==='string'?result.price:null;if(JSON.stringify(this.state)!==previous)this.onChange?.(this.state);}return this.state;}
+ async refresh(){const result=await this.request('status');if(result.status==='ok'){const previous=JSON.stringify(this.state);for(const k of ['noAds','rewardedReady','interstitialReady','billingReady','privacyRequired'])this.state[k]=result[k]===true;this.state.price=typeof result.price==='string'?result.price:null;this.state.owned=Array.isArray(result.owned)?result.owned.filter(p=>PRODUCTS.has(p)):[];this.state.prices={};if(result.prices&&typeof result.prices==='object')for(const [p,v] of Object.entries(result.prices))if(PRODUCTS.has(p)&&typeof v==='string'&&v.length<40)this.state.prices[p]=v;if(JSON.stringify(this.state)!==previous)this.onChange?.(this.state);}return this.state;}
  async perform(action){
   if(this.busy)return {status:'busy'};this.busy=true;
   try{const result=await this.request(action,action==='rewarded'||action==='interstitial'?300000:120000);await this.refresh();return result;}finally{this.busy=false;}
