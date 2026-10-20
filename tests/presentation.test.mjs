@@ -26,3 +26,11 @@ test('music and effects mute existing voices independently; unrelated preference
  score.timer=42;score.update({music:true,sound:false,weather:false});assert.equal(score.timer,42);assert.deepEqual(calls,{music:[1],effects:[0]});
  score.update({music:false,sound:true});assert.equal(score.timer,null);assert.deepEqual(calls,{music:[1,0],effects:[0,1]});
 });
+test('every level and region has an English name for non-Turkish devices',async()=>{
+ const {levels}=await import('../dist/js/levels.js');const {worlds}=await import('../dist/js/level-blueprints.js');const {localizeContent,LANG}=await import('../dist/js/i18n.js');
+ const ls=levels.map(l=>({...l})),ws=worlds.map(w=>({...w}));localizeContent(ls,ws);
+ if(LANG==='tr')return;
+ for(const l of ls)assert.doesNotMatch(l.name,/[çğıöşüÇĞİÖŞÜ]/,`level ${l.id}`);
+ for(const w of ws){assert.doesNotMatch(w.name,/[çğıöşüÇĞİÖŞÜ]/);assert.doesNotMatch(w.subtitle,/[çğıöşüÇĞİÖŞÜ]/);}
+ assert.equal(new Set(ls.map(l=>l.name)).size,ls.length);
+});

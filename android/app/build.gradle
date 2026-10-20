@@ -16,8 +16,8 @@ android {
         applicationId 'com.railquest.game'
         minSdk 26
         targetSdk 36
-        versionCode 17
-        versionName '0.14.0'
+        versionCode 18
+        versionName '0.15.0'
         manifestPlaceholders = [rotaAdmobAppId:rotaAppId]
         buildConfigField 'String','BILLING_VERIFY_URL',rotaString(rotaVerifier)
         buildConfigField 'boolean','ADS_ENABLED','false'
