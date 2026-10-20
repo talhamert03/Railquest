@@ -2,6 +2,12 @@
 
 Telefon ve tablet için yalnız yatay tasarlanan özgün tren bulmacası. 58 bölüm, altı bölge, sınırlı ray bütçesi, altıya kadar numaralı vagon, ortak hatlar, köprüler, A/B/C tünelleri, bekleme peronları, sinyaller ve tek yönlü geçitler.
 
+## Railquest — 0.12.0 · Tam ekran ve akıcılık
+
+- **Tam ekran:** Android uygulaması kenardan kenara çizer; kamera deliği bölgesinde açık renkli şerit kalmaz. Delik ölçüsü CSS değişkenleriyle (`--native-safe-*`) sayfaya iletilir, yalnız düğmeler ondan uzak durur.
+- **Akıcılık:** Deniz, ışık ve zemin tek bir önbellekte; her karede tek görüntü kopyalanır. Harita kaydırılırken önbellek yeniden çizilmez, kaydırılır. Traversler tek çizim komutunda toplanır, rozetlerde bulanık gölge kullanılmaz. Yavaş cihazda canvas çözünürlüğü bir kez otomatik düşer. Menü animasyonları yalnız dönüşüm (transform) kullanır; pencere arkasındaki bulanıklık kaldırıldı ve pencere açıkken harita boşuna yeniden çizilmez. 4× yavaşlatılmış işlemcide boşta 31→60, kaydırmada 16→~45 FPS.
+- **Vagonlar:** Desen ve efekt altyapısı (`dist/js/skin-effects.js`) eklendi; tasarımlar yeniden ele alınıyor. Android sürüm kodu 15.
+
 ## Railquest — 0.11.0 · Garaj ve yeni gelir modeli
 
 - **Ekstra ray:** Ücretsiz ipucu kaldırıldı. Oyunun üst çubuğundaki video rozetli **+3 ray** düğmesi (ve oyun menüsündeki kutucuk) ödüllü videodan sonra o bölüme 3 ray ekler; bölüm başına en fazla 3 kez. Otomatik çöz oyun menüsünde videolu kutucuk olarak durur.
@@ -129,7 +135,7 @@ node scripts/check.mjs
 
 ## Android
 
-Android kaynak projesi 0.11.0 / versionCode 14 ve `sensorLandscape` kullanır. Gradle wrapper kaynaklara dahildir. Debug APK derleme ve imza kontrolleri `docs/RELEASE-READINESS.md` içinde kayıtlıdır. Gerçek Galaxy A36, tarayıcı CSS yerleşimi ve Play reklam/ödeme kabul testi henüz yapılmadı. Android Studio kurulum ayrıntıları `android/README.md` içindedir.
+Android kaynak projesi 0.12.0 / versionCode 15 ve `sensorLandscape` kullanır. Gradle wrapper kaynaklara dahildir. Debug APK derleme ve imza kontrolleri `docs/RELEASE-READINESS.md` içinde kayıtlıdır. Gerçek Galaxy A36, tarayıcı CSS yerleşimi ve Play reklam/ödeme kabul testi henüz yapılmadı. Android Studio kurulum ayrıntıları `android/README.md` içindedir.
 
 ## Görseller
 

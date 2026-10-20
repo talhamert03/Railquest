@@ -1,4 +1,4 @@
-/** Wagon skins. Rows index dist/assets/wagon-skins.webp (built by scripts/build-wagon-skins.py). */
+/** Wagon skins. Rows index dist/assets/wagon-skins.webp (built by scripts/build-wagon-skins.py); accessories and effects live in skin-effects.js. */
 export const SKIN_ATLAS='./assets/wagon-skins.webp';
 export const SKIN_ATLAS_SIZE=Object.freeze([952,2490]);
 export const SKIN_CELL=Object.freeze([238,249]);
@@ -10,25 +10,16 @@ export const CLASSIC_THUMB=Object.freeze({src:'./assets/vehicles-v2.webp',atlas:
 export const SKIN_PRICE_LABEL='24,99 ₺';
 export const WAGON_SKINS=Object.freeze([
  {id:'classic',name:'Klasik',tagline:'Railquest’in ilk vagonu',row:-1,product:null,accent:'#c4563e'},
- {id:'sakura',name:'Kiraz Çiçeği',tagline:'Pembe çatı, bahar havası',row:0,product:'wagon_sakura',accent:'#f2a0bd'},
- {id:'midnight',name:'Gece Ekspresi',tagline:'Işıl ışıl pencereler',row:1,product:'wagon_midnight',accent:'#2d3c74'},
- {id:'golden',name:'Altın Lüks',tagline:'Siyah ve altın, birinci sınıf',row:2,product:'wagon_golden',accent:'#f0c04a'},
- {id:'mint',name:'Nane Şekeri',tagline:'Ferah nane, şeker pembe',row:3,product:'wagon_mint',accent:'#79d6bd'},
- {id:'lemon',name:'Limonata',tagline:'Güneşli bir yaz yolculuğu',row:4,product:'wagon_lemon',accent:'#ffd84a'},
- {id:'lavender',name:'Lavanta',tagline:'Mor tarlaların kokusu',row:5,product:'wagon_lavender',accent:'#9b7ed6'},
- {id:'forest',name:'Orman Kulübesi',tagline:'Ahşap gövde, yosun çatı',row:6,product:'wagon_forest',accent:'#6aa84f'},
- {id:'ocean',name:'Okyanus Esintisi',tagline:'Turkuaz dalgalar',row:7,product:'wagon_ocean',accent:'#2fb3c4'},
- {id:'frost',name:'Buz Kristali',tagline:'Karlı bir sabah',row:8,product:'wagon_frost',accent:'#bfe3f7'},
- {id:'halloween',name:'Balkabağı Gecesi',tagline:'Cadılar Bayramı’na özel',row:9,product:'wagon_halloween',accent:'#f28a1e',seasonal:true},
+ {id:'dragon',name:'Ejderha Ekspresi',tagline:'Pullu gövde, çırpan kanatlar, ateş nefesi',row:0,product:'wagon_dragon',accent:'#3fae5a'},
+ {id:'unicorn',name:'Unicorn',tagline:'Altın boynuz ve pırıltılar',row:1,product:'wagon_unicorn',accent:'#e27fd0'},
+ {id:'galaxy',name:'Galaksi Yolcusu',tagline:'Yıldız tozu ve yörüngede minik gezegen',row:2,product:'wagon_galaxy',accent:'#5b2fb8'},
+ {id:'halloween',name:'Balkabağı Gecesi',tagline:'Titreyen fener, etrafında yarasalar',row:3,product:'wagon_halloween',accent:'#f28a1e',seasonal:true},
+ {id:'icequeen',name:'Buz Kraliçesi',tagline:'Kristal taç, süzülen kar taneleri',row:4,product:'wagon_icequeen',accent:'#7fb8f0'},
+ {id:'sakura',name:'Kiraz Bahçesi',tagline:'Çiçek tacı, uçuşan yapraklar',row:5,product:'wagon_sakura',accent:'#ec5f95'},
+ {id:'mermaid',name:'Deniz Kızı',tagline:'Sedef pullar, yükselen baloncuklar',row:6,product:'wagon_mermaid',accent:'#46d1c3'},
+ {id:'royal',name:'Kraliyet Treni',tagline:'Mücevherli taç, altın pırıltılar',row:7,product:'wagon_royal',accent:'#e9b949'},
+ {id:'candy',name:'Şeker Diyarı',tagline:'Dönen lolipop, uçan kalpler',row:8,product:'wagon_candy',accent:'#ff7fb0'},
+ {id:'firefly',name:'Ateş Böceği Ormanı',tagline:'Mantar şapka, yanıp sönen ateş böcekleri',row:9,product:'wagon_firefly',accent:'#6aa84f'},
 ]);
 export const SKIN_PRODUCTS=Object.freeze(WAGON_SKINS.filter(s=>s.product).map(s=>s.product));
 export const skinById=id=>WAGON_SKINS.find(s=>s.id===id)||WAGON_SKINS[0];
-/** CSS background for a skin thumbnail of the given width, cropped from its atlas. */
-export function skinThumb(skin,width){
- if(skin.row<0){
-  const {src,atlas,rect:[x,y,w,h]}=CLASSIC_THUMB,f=width/w;
-  return `width:${width}px;height:${Math.round(h*f)}px;background:url(${src}) ${-x*f}px ${-y*f}px/${atlas[0]*f}px ${atlas[1]*f}px no-repeat`;
- }
- const [,,w,h]=SKIN_RECTS[0],f=width/w;
- return `width:${width}px;height:${Math.round(h*f)}px;background:url(${SKIN_ATLAS}) 0 ${-skin.row*SKIN_CELL[1]*f}px/${SKIN_ATLAS_SIZE[0]*f}px ${SKIN_ATLAS_SIZE[1]*f}px no-repeat`;
-}

@@ -1,4 +1,4 @@
-# Gelir modeli — 0.11.0
+# Gelir modeli — 0.12.0
 
 Ücretsiz ana oyun. Gelir dört yerden gelir: her dört tamamlanan turda bir otomatik geçiş reklamı, isteğe bağlı ödüllü videolar (ekstra ray ve otomatik çöz), tek seferlik No Ads ve tek seferlik vagon kozmetikleri. Can, enerji veya ücretli bölüm yok.
 
@@ -22,16 +22,16 @@ Hepsi **tüketilmeyen** (one-time, non-consumable) uygulama içi ürün; satın 
 | Ürün kimliği | Görünen ad |
 |---|---|
 | `rota_plus` | No Ads |
-| `wagon_sakura` | Kiraz Çiçeği Vagonu |
-| `wagon_midnight` | Gece Ekspresi Vagonu |
-| `wagon_golden` | Altın Lüks Vagonu |
-| `wagon_mint` | Nane Şekeri Vagonu |
-| `wagon_lemon` | Limonata Vagonu |
-| `wagon_lavender` | Lavanta Vagonu |
-| `wagon_forest` | Orman Kulübesi Vagonu |
-| `wagon_ocean` | Okyanus Esintisi Vagonu |
-| `wagon_frost` | Buz Kristali Vagonu |
-| `wagon_halloween` | Balkabağı Gecesi Vagonu (Cadılar Bayramı) |
+| `wagon_dragon` | Ejderha Ekspresi |
+| `wagon_unicorn` | Unicorn |
+| `wagon_galaxy` | Galaksi Yolcusu |
+| `wagon_halloween` | Balkabağı Gecesi (Cadılar Bayramı) |
+| `wagon_icequeen` | Buz Kraliçesi |
+| `wagon_sakura` | Kiraz Bahçesi |
+| `wagon_mermaid` | Deniz Kızı |
+| `wagon_royal` | Kraliyet Treni |
+| `wagon_candy` | Şeker Diyarı |
+| `wagon_firefly` | Ateş Böceği Ormanı |
 
 Kimlikler `dist/js/cosmetics.js` ve `BillingController.java` içinde aynıdır; `tests/billing.test.mjs` iki listenin eşleştiğini denetler.
 
@@ -74,3 +74,5 @@ Web ödeme almaz ve gerçek reklam göstermez. Ödüllü video, geçiş reklamı
 | Debug APK | Paket `.dev` olduğu için Play ürünleri bulunmaz; satın alma testi dahili test kanalındaki imzalı sürümle yapılır |
 
 Aktif kullanıcı ve reklam doluluğu bilinmediği için gelir tahmini verilmez.
+
+> Not (0.12.0): Vagon tasarımları yeniden ele alınıyor; ürün kimlikleri tasarımlar kesinleşince Play Console'a girilmeli.

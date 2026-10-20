@@ -94,10 +94,10 @@ test('No Ads owners must still complete a rewarded ad to auto-solve',async()=>{
 });
 test('skin ownership and prices come only from native status for known products',async()=>{
  const requests=[],host={RotaCommerce:{request:(id,action)=>requests.push({id,action})}},c=new NativeCommerce(host);
- c.previewOwned.add('wagon_mint');assert.equal(c.owns('wagon_mint'),false);
- const refresh=c.refresh();c.receive(requests[0].id,{status:'ok',owned:['wagon_mint','wagon_fake',7],prices:{wagon_mint:'₺24,99',evil:'x'}});await refresh;
- assert.equal(c.owns('wagon_mint'),true);assert.equal(c.owns('wagon_fake'),false);assert.deepEqual(c.state.prices,{wagon_mint:'₺24,99'});
- const web=new NativeCommerce({});assert.equal(web.owns('wagon_mint'),false);web.previewOwned.add('wagon_mint');assert.equal(web.owns('wagon_mint'),true);
+ c.previewOwned.add('wagon_candy');assert.equal(c.owns('wagon_candy'),false);
+ const refresh=c.refresh();c.receive(requests[0].id,{status:'ok',owned:['wagon_candy','wagon_fake',7],prices:{wagon_candy:'₺24,99',evil:'x'}});await refresh;
+ assert.equal(c.owns('wagon_candy'),true);assert.equal(c.owns('wagon_fake'),false);assert.deepEqual(c.state.prices,{wagon_candy:'₺24,99'});
+ const web=new NativeCommerce({});assert.equal(web.owns('wagon_candy'),false);web.previewOwned.add('wagon_candy');assert.equal(web.owns('wagon_candy'),true);
 });
 test('a stored skin choice survives reload but unknown skins fall back to classic',()=>{
  const s=defaults();s.wagonSkin='halloween';assert.equal(normalizeSave(JSON.parse(JSON.stringify(s))).wagonSkin,'halloween');

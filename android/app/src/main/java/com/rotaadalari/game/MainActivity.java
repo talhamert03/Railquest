@@ -38,27 +38,36 @@ public final class MainActivity extends Activity {
         webView.setBackgroundColor(Color.rgb(169, 217, 209));
         root.addView(webView, new FrameLayout.LayoutParams(-1, -1));
         setContentView(root);
+        // Edge to edge: the WebView covers the whole screen, including the camera cutout. Only the page's
+        // controls keep clear of the cutout, through CSS variables (see publishSafeArea), so no empty band shows.
+        root.setOnApplyWindowInsetsListener((v, insets) -> {
+            int left=0,top=0,right=0,bottom=0;
+            if (Build.VERSION.SDK_INT >= 30) {
+                Insets cut = insets.getInsets(WindowInsets.Type.displayCutout());
+                left=cut.left;top=cut.top;right=cut.right;bottom=cut.bottom;
+            } else if (Build.VERSION.SDK_INT >= 28 && insets.getDisplayCutout() != null) {
+                android.view.DisplayCutout cut = insets.getDisplayCutout();
+                left=cut.getSafeInsetLeft();top=cut.getSafeInsetTop();right=cut.getSafeInsetRight();bottom=cut.getSafeInsetBottom();
+            }
+            float density=getResources().getDisplayMetrics().density;
+            safeArea=new int[]{Math.round(top/density),Math.round(right/density),Math.round(bottom/density),Math.round(left/density)};
+            publishSafeArea();
+            // Transient system bars overlay the game without resizing it.
+            return Build.VERSION.SDK_INT >= 30 ? WindowInsets.CONSUMED : insets.consumeSystemWindowInsets();
+        });
         if (Build.VERSION.SDK_INT >= 30) {
             getWindow().setDecorFitsSystemWindows(false);
-            root.setOnApplyWindowInsetsListener((v, insets) -> {
-                // Temporary system bars overlay the game without shrinking its camera.
-                Insets bars = insets.getInsets(WindowInsets.Type.displayCutout());
-                v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
-                // Native padding already keeps the WebView clear of display cutouts.
-                // Consume these insets so CSS env(safe-area-inset-*) is not applied twice.
-                return WindowInsets.CONSUMED;
-            });
             WindowInsetsController controller = getWindow().getInsetsController();
             if (controller != null) controller.setSystemBarsAppearance(
                 WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
                 WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS);
-            root.requestApplyInsets();
-        } else {
-            root.setFitsSystemWindows(true);
         }
+        root.requestApplyInsets();
         if (Build.VERSION.SDK_INT >= 28) {
             WindowManager.LayoutParams attributes = getWindow().getAttributes();
-            attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            attributes.layoutInDisplayCutoutMode = Build.VERSION.SDK_INT >= 30
+                ? WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                : WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
             getWindow().setAttributes(attributes);
         }
         if (Build.VERSION.SDK_INT >= 29) getWindow().setNavigationBarContrastEnforced(false);
@@ -87,7 +96,7 @@ public final class MainActivity extends Activity {
             .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
             .build();
         webView.setWebViewClient(new WebViewClient() {
-            @Override public void onPageFinished(WebView view,String url) { if(START.equals(url) && commerce!=null)commerce.start(); }
+            @Override public void onPageFinished(WebView view,String url) { publishSafeArea(); if(START.equals(url) && commerce!=null)commerce.start(); }
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
                 if ("https".equals(uri.getScheme()) && HOST.equals(uri.getHost())) {
@@ -129,6 +138,14 @@ public final class MainActivity extends Activity {
     @Override public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) enterImmersive();
+    }
+
+    private int[] safeArea={0,0,0,0};
+    private void publishSafeArea() {
+        if (webView == null) return;
+        String[] sides={"top","right","bottom","left"};StringBuilder js=new StringBuilder("(function(s){");
+        for (int i=0;i<4;i++) js.append("s.setProperty('--native-safe-").append(sides[i]).append("','").append(safeArea[i]).append("px');");
+        webView.evaluateJavascript(js.append("})(document.documentElement.style)").toString(), null);
     }
 
     private void navigateBack() {

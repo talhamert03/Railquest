@@ -16,8 +16,8 @@ android {
         applicationId 'com.rotaadalari.game'
         minSdk 26
         targetSdk 36
-        versionCode 14
-        versionName '0.11.0'
+        versionCode 15
+        versionName '0.12.0'
         manifestPlaceholders = [rotaAdmobAppId:rotaAppId]
         buildConfigField 'String','BILLING_VERIFY_URL',rotaString(rotaVerifier)
         buildConfigField 'boolean','ADS_ENABLED','false'

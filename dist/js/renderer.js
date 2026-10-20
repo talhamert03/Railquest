@@ -7,8 +7,11 @@ import {keySign} from './key-signs.js';
 import {BoardCamera} from './camera.js';
 import {BoardGesture} from './board-gesture.js';
 import {SKIN_RECTS,SKIN_CELL,skinById} from './cosmetics.js';
+import {drawSkinBack,drawSkinFront} from './skin-effects.js';
 const RECT={tree:[31,54,332,402],pine:[402,33,356,425],stones:[819,191,326,263],flowers:[1208,224,304,209],tunnelE:[10,554,368,371],tunnelS:[401,553,367,371],station:[772,559,516,393],sign:[1311,538,179,407]};
 const VEHICLES=[[30,79,344,370],[409,79,340,370],[791,85,332,370],[1185,82,333,367],[35,586,328,338],[423,586,326,340],[801,583,322,344],[1189,581,320,344]];
+/** Canvas resolution budget, shared by every board. Lowered once if a device cannot keep up. */
+const QUALITY={cap:2,floor:1.25,pixels:2200000};
 export const CAR_COLORS=['#276e86','#c97931','#9069a6','#ad5265','#53854e','#5268a3'];
 const TAU=Math.PI*2,clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 export class IslandRenderer{
@@ -20,22 +23,25 @@ export class IslandRenderer{
  }
  setLevel(level,state){this.level=level;this.state=state;this.world=worlds[level.world];this.signalKeys=Object.keys(level.signals||{});this.hover=null;this.focused=level.start;this.camera.setLevel(level);this.particles=[];this.convoyCount=0;this.motionTime=0;this.resize();if(this.camera.size>this.camera.fitSize*1.05)this.focusCell(state.routes[state.selected]?.at(-1)||level.start); }
  updateState(state){this.state=state;this.dirty=true;}
- resize(){
+ resize(quiet=false){
   const r=this.canvas.getBoundingClientRect();if(!r.width||!r.height)return;
-  this.input?.cancel();this.width=r.width;this.height=r.height;this.dpr=Math.min(window.devicePixelRatio||1,2,Math.sqrt(2200000/(r.width*r.height)));
-  this.canvas.width=Math.round(r.width*this.dpr);this.canvas.height=Math.round(r.height*this.dpr);this.terrain.width=this.canvas.width;this.terrain.height=this.canvas.height;
+  if(!quiet)this.input?.cancel();this.width=r.width;this.height=r.height;this.dpr=Math.min(window.devicePixelRatio||1,QUALITY.cap,Math.sqrt(QUALITY.pixels/(r.width*r.height)));
+  // The cached ground extends past the viewport so panning only shifts it instead of repainting it.
+  this.margin=Math.round(Math.max(r.width,r.height)*.22);
+  this.canvas.width=Math.round(r.width*this.dpr);this.canvas.height=Math.round(r.height*this.dpr);this.terrain.width=Math.round((r.width+2*this.margin)*this.dpr);this.terrain.height=Math.round((r.height+2*this.margin)*this.dpr);
   this.weather=createWeather(this.width,this.height,this.world?.weather,this.level?.id||1);
   const palette={meadow:['#d8ecc6','#90c9bd'],desert:['#ffe6b8',this.world?.water||'#a4d6cc'],snow:['#eff6f4','#b2cfdf'],ice:['#dfebff','#83b8d0'],clock:['#e8d6dc','#b8b5d7']}[this.world?.biome]||['#c9e6d3','#a9d9d1'];
-  this.atmosphere=this.ctx.createRadialGradient(this.width*.5,this.height*.5,0,this.width*.5,this.height*.5,Math.min(this.width,this.height)*.5);this.atmosphere.addColorStop(0,`${palette[0]}99`);this.atmosphere.addColorStop(1,`${palette[1]}00`);
-  this.light=this.ctx.createRadialGradient(this.width*.6,this.height*.4,0,this.width*.6,this.height*.4,Math.min(this.width,this.height)*.4);this.light.addColorStop(0,this.world?.biome==='ice'?'#9affd655':'#fff5c744');this.light.addColorStop(1,'#ffffff00');
-  this.aurora=this.ctx.createLinearGradient(0,0,this.width,0);this.aurora.addColorStop(0,'#c3ffeb00');this.aurora.addColorStop(.25,'#c3ffeb');this.aurora.addColorStop(.75,'#d5c5ff');this.aurora.addColorStop(1,'#d5c5ff00');
+  const t=this.terrain.getContext('2d');
+  this.atmosphere=t.createRadialGradient(this.width*.5,this.height*.5,0,this.width*.5,this.height*.5,Math.min(this.width,this.height)*.5);this.atmosphere.addColorStop(0,`${palette[0]}99`);this.atmosphere.addColorStop(1,`${palette[1]}00`);
+  this.light=t.createRadialGradient(this.width*.6,this.height*.4,0,this.width*.6,this.height*.4,Math.min(this.width,this.height)*.4);this.light.addColorStop(0,this.world?.biome==='ice'?'#9affd655':'#fff5c744');this.light.addColorStop(1,'#ffffff00');
+  this.aurora=t.createLinearGradient(0,0,this.width,0);this.aurora.addColorStop(0,'#c3ffeb00');this.aurora.addColorStop(.25,'#c3ffeb');this.aurora.addColorStop(.75,'#d5c5ff');this.aurora.addColorStop(1,'#d5c5ff00');
   this.camera.resize(this.width,this.height);this.updateProjection();this.cacheTerrain();this.dirty=true;this.callbacks.camera?.();
  }
  updateProjection(){
   if(!this.level||!this.camera.initialized)return;
   this.size=this.camera.size;this.cx=this.camera.cx;this.cy=this.camera.cy;this.zoom=this.size/this.camera.fitSize;
  }
- refreshCamera(){this.updateProjection();this.terrainDirty=true;this.dirty=true;this.callbacks.camera?.();}
+ refreshCamera(){this.updateProjection();this.dirty=true;this.callbacks.camera?.();}
  panBy(dx,dy){this.camera.panBy(dx,dy);this.refreshCamera();}
  zoomBy(factor,point){this.input.cancel();this.camera.zoomBy(factor,point);this.refreshCamera();}
  fitBoard(){this.input.cancel();this.camera.fit();this.refreshCamera();}
@@ -71,8 +77,23 @@ export class IslandRenderer{
  circle(ctx,x,y,r,fill,stroke=null,width=1){if(!Number.isFinite(r)||r<=0)return;ctx.beginPath();ctx.arc(x,y,r,0,TAU);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.lineWidth=width;ctx.strokeStyle=stroke;ctx.stroke();}}
  cacheTerrain(){
   if(!this.level||!this.width)return;this.terrainDirty=false;
-  const c=this.terrain.getContext('2d');c.setTransform(this.dpr,0,0,this.dpr,0,0);c.clearRect(0,0,this.width,this.height);
-  const {level,size:s,world:w}=this;
+  const c=this.terrain.getContext('2d'),m=this.margin,{level,size:s,world:w}=this;
+  this.terrainView={cx:this.cx,cy:this.cy,size:this.size};
+  // Sea, atmosphere and light are static, so they live in the cache instead of being refilled every frame.
+  // Biome art uses multiply against this opaque sea; a transparent backing exposes the atlases' white matte.
+  c.setTransform(this.dpr,0,0,this.dpr,0,0);c.fillStyle=w.water;c.fillRect(0,0,this.width+2*m,this.height+2*m);c.translate(m,m);
+  c.fillStyle=this.atmosphere;c.fillRect(-m,-m,this.width+2*m,this.height+2*m);
+  if(this.settings.weather!==false){
+   c.save();c.globalAlpha=.8;c.fillStyle=this.light;c.fillRect(-m,-m,this.width+2*m,this.height+2*m);c.restore();
+   if(w.biome==='ice'){
+    c.save();c.globalAlpha=.12;c.strokeStyle=this.aurora;c.lineWidth=Math.max(12,this.height*.075);c.lineCap='round';c.beginPath();
+    for(let i=0;i<=12;i++){const x=i*this.width/12,y=this.height*(.13+Math.sin(i*.35)*.075);i?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();c.restore();
+   }
+  }
+  for(let i=0;i<(w.biome==='desert'||w.biome==='clock'?0:9);i++){
+   const px=(i*197+43)%this.width,py=(i*83+51)%this.height;c.globalAlpha=.19;
+   c.beginPath();c.ellipse(px,py,11+(i%3)*7,2,0,0,Math.PI);c.strokeStyle='#effbf1';c.lineWidth=1.6;c.stroke();
+  }c.globalAlpha=1;
   // The map is a small solid island; water lanes physically divide it.
   const cells=[...level.cells.values()].sort((a,b)=>a.x+a.y-b.x-b.y);
   c.save();c.shadowColor='rgba(42,91,78,.15)';c.shadowBlur=s*.5;c.shadowOffsetY=s*.42;
@@ -148,12 +169,15 @@ export class IslandRenderer{
    this.strokePolyline(ctx,pts,'rgba(92,104,68,.2)',s*.36);
    this.strokePolyline(ctx,pts,'#d6bd88',s*.29);
    // Sleepers are sampled by distance along the exact same rounded centerline.
-   let carry=0;
+   // All sleepers of a piece share one path and one stroke (hundreds of strokes per frame otherwise).
+   let carry=0;ctx.beginPath();
    for(let i=1;i<pts.length;i++){
     const a=pts[i-1],b=pts[i],len=Math.hypot(b.x-a.x,b.y-a.y);if(len<.01)continue;
-    for(let d=carry;d<len;d+=s*.145){const t=d/len,p={x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t},nx=-(b.y-a.y)/len,ny=(b.x-a.x)/len;this.line(ctx,{x:p.x+nx*s*.19,y:p.y+ny*s*.19},{x:p.x-nx*s*.19,y:p.y-ny*s*.19},'#987448',Math.max(2,s*.052));}
+    const nx=-(b.y-a.y)/len*s*.19,ny=(b.x-a.x)/len*s*.19;
+    for(let d=carry;d<len;d+=s*.145){const t=d/len,x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;ctx.moveTo(x+nx,y+ny);ctx.lineTo(x-nx,y-ny);}
     carry=(carry-len)%(s*.145);if(carry<0)carry+=s*.145;
    }
+   ctx.strokeStyle='#987448';ctx.lineWidth=Math.max(2,s*.052);ctx.lineCap='round';ctx.stroke();
    for(const side of [-1,1]){
     const rail=pts.map((p,i)=>{const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)],len=Math.hypot(b.x-a.x,b.y-a.y)||1;return {x:p.x-(b.y-a.y)/len*s*.095*side,y:p.y+(b.x-a.x)/len*s*.095*side};});
     this.strokePolyline(ctx,rail,'#415a4d',Math.max(2.5,s*.062));this.strokePolyline(ctx,rail,'#e9e8ca',Math.max(1,s*.025));
@@ -163,7 +187,8 @@ export class IslandRenderer{
  }
  badge(ctx,x,y,text,color,z=.95){
   const p=this.project(x,y,z),s=this.size,r=Math.max(10,Math.min(17,s*.24));
-  ctx.save();ctx.shadowColor='rgba(34,57,42,.22)';ctx.shadowBlur=5;ctx.shadowOffsetY=2;this.circle(ctx,p.x,p.y,r,color,'#fff9e9',2);ctx.restore();
+  // A soft offset disc instead of shadowBlur: badges are drawn every frame and blur is the costliest canvas op.
+  this.circle(ctx,p.x,p.y+2,r+1.5,'rgba(34,57,42,.16)');this.circle(ctx,p.x,p.y,r,color,'#fff9e9',2);
   ctx.fillStyle='#fffdf0';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`700 ${Math.max(13,r*1.13)}px Rubik, sans-serif`;ctx.fillText(text,p.x,p.y+.5);
  }
  waitPlatform(ctx,cell){
@@ -238,21 +263,13 @@ export class IslandRenderer{
   const skin=!engine&&this.art.skins?skinById(this.skin):null,skinned=skin&&skin.row>=0;
   let [sx,sy,sw,sh]=skinned?SKIN_RECTS[dir%4]:VEHICLES[(engine?0:4)+(dir%4)];if(skinned)sy+=skin.row*SKIN_CELL[1];
   const w=s*(engine?1.13:1.01),h=w*sh/sw;
-  ctx.translate(p.x,p.y+s*.22);ctx.rotate(pose.tilt);ctx.scale(1,pose.scaleY);ctx.drawImage(skinned?this.art.skins:this.art.vehicles,sx,sy,sw,sh,-w/2,-h-s*pose.lift,w,h);
-  if(skin?.id==='halloween')this.pumpkin(ctx,(dir%2?-1:1)*w*.24,-h*.8-s*pose.lift,s*.14);
+  ctx.translate(p.x,p.y+s*.22);ctx.rotate(pose.tilt);ctx.scale(1,pose.scaleY);ctx.translate(0,-s*pose.lift);
+  const fx=skinned?{w,h,s,t:this.motionTime||0,dir,moving:!!pos.moving,reduced:this.settings.reducedMotion}:null;
+  if(fx)drawSkinBack(ctx,skin.id,fx);
+  ctx.drawImage(skinned?this.art.skins:this.art.vehicles,sx,sy,sw,sh,-w/2,-h,w,h);
+  if(fx)drawSkinFront(ctx,skin.id,fx);
   ctx.restore();
   if(!engine&&alpha>.4)this.badge(ctx,x,y,String(id),CAR_COLORS[id-1],1.01+pose.lift);
- }
- pumpkin(ctx,x,y,r){
-  // A small jack-o'-lantern riding on the Halloween carriage roof.
-  ctx.save();ctx.translate(x,y);
-  ctx.fillStyle='#3e7d2c';ctx.fillRect(-r*.12,-r*1.25,r*.24,r*.45);
-  ctx.beginPath();ctx.ellipse(0,0,r*1.05,r*.85,0,0,TAU);ctx.fillStyle='#f28a1e';ctx.fill();ctx.lineWidth=Math.max(1,r*.12);ctx.strokeStyle='#a4520c';ctx.stroke();
-  ctx.beginPath();ctx.ellipse(0,0,r*.45,r*.85,0,0,TAU);ctx.strokeStyle='rgba(164,82,12,.6)';ctx.stroke();
-  ctx.fillStyle='#ffe066';ctx.shadowColor='#ffd23f';ctx.shadowBlur=r*.6;
-  for(const sx of [-1,1]){ctx.beginPath();ctx.moveTo(sx*r*.45,-r*.12);ctx.lineTo(sx*r*.2,-r*.12);ctx.lineTo(sx*r*.33,-r*.42);ctx.closePath();ctx.fill();}
-  ctx.beginPath();ctx.moveTo(-r*.55,r*.18);ctx.quadraticCurveTo(0,r*.7,r*.55,r*.18);ctx.quadraticCurveTo(0,r*.38,-r*.55,r*.18);ctx.fill();
-  ctx.restore();
  }
  burst(k,color='#f6c967'){
   if(this.settings.reducedMotion)return;
@@ -261,27 +278,15 @@ export class IslandRenderer{
   this.dirty=true;
  }
  draw(time,dt){
-  if(this.terrainDirty)this.cacheTerrain();
   if(!this.level)return;
-  const c=this.ctx,{level,state,size:s}=this;
-  c.setTransform(this.dpr,0,0,this.dpr,0,0);
-  // Biome art uses multiply against this opaque sea, including outside the island.
-  // A transparent backing exposes the atlases' white matte at coastal edges.
-  c.fillStyle=this.world.water;c.fillRect(0,0,this.width,this.height);
+  const view=this.terrainView,m=this.margin;
+  if(this.terrainDirty||!view||view.size!==this.size||Math.abs(this.cx-view.cx)>m||Math.abs(this.cy-view.cy)>m)this.cacheTerrain();
+  const c=this.ctx,{level,state,size:s}=this,d=this.dpr;
+  c.setTransform(d,0,0,d,0,0);
   if(!state.paused&&!state.overlay)this.motionTime=(this.motionTime||0)+Math.max(0,dt);
-  c.fillStyle=this.atmosphere;c.fillRect(0,0,this.width,this.height);
   const phase=this.settings.reducedMotion?0:time;
-  if(this.settings.weather!==false){
-   c.save();c.globalAlpha=this.settings.reducedMotion?1:.8+Math.sin(phase*.22)*.2;c.fillStyle=this.light;c.fillRect(0,0,this.width,this.height);c.restore();
-   if(this.world.biome==='ice'){
-    c.save();c.globalAlpha=.12;c.strokeStyle=this.aurora;c.lineWidth=Math.max(12,this.height*.075);c.lineCap='round';c.beginPath();
-    for(let i=0;i<=12;i++){const x=i*this.width/12,y=this.height*(.13+Math.sin(i*.35+phase*.13)*.075);i?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();c.restore();
-   }
-  }
-  for(let i=0;i<(this.world.biome==='desert'||this.world.biome==='clock'?0:9);i++){
-   const px=(i*197+43)%this.width,py=(i*83+51)%this.height;c.globalAlpha=.17+Math.sin(phase*.6+i)*.06;
-   c.beginPath();c.ellipse(px,py,11+(i%3)*7,2,0,0,Math.PI);c.strokeStyle='#effbf1';c.lineWidth=1.6;c.stroke();
-  }c.globalAlpha=1;c.drawImage(this.terrain,0,0,this.width,this.height);
+  // One opaque blit replaces the sea, light and ground passes; a pan just shifts the source window.
+  c.drawImage(this.terrain,(m-this.cx+this.terrainView.cx)*d,(m-this.cy+this.terrainView.cy)*d,this.width*d,this.height*d,0,0,this.width,this.height);
   const selected=state.routes[state.selected],tail=selected.at(-1),color=CAR_COLORS[state.selected-1];
   if(!state.journey&&!state.preview){
    for(const cell of level.cells.values())if(connectionAllowed(level,tail,cell.key))this.diamond(c,cell.x,cell.y,.85,.008,'rgba(255,250,220,.38)','rgba(62,111,76,.38)',1.1);
@@ -357,9 +362,21 @@ export class IslandRenderer{
   const dt=this.last?Math.min((now-this.last)/1000,.05):0;this.last=now;
   if(!document.hidden){
    this.callbacks.tick?.(dt);const active=this.state?.journey&&!this.state?.paused&&!this.state?.overlay&&!this.state.journey.done;
-   if(this.dirty||active||(!this.settings.reducedMotion&&now-this.lastDraw>40)||this.particles.length){this.draw(now/1000,this.lastDraw?Math.min((now-this.lastDraw)/1000,.1):0);this.lastDraw=now;this.dirty=false;}
+   if(this.dirty||active||(!this.settings.reducedMotion&&!this.suspended&&now-this.lastDraw>40)||this.particles.length){
+    if(active)this.measure(now);
+    this.draw(now/1000,this.lastDraw?Math.min((now-this.lastDraw)/1000,.1):0);this.lastDraw=now;this.dirty=false;
+   }
   }
   this.raf=requestAnimationFrame(this.frame);
+ }
+ measure(now){
+  // While trains run every frame is drawn; if a device averages under ~38 fps, render fewer pixels once.
+  const gap=now-(this.lastDraw||now),p=this.perf||(this.perf={n:0,sum:0});
+  if(gap<=0||gap>200){p.n=0;p.sum=0;return;}
+  p.n++;p.sum+=gap;
+  if(p.n<45)return;
+  const slow=p.sum/p.n>26;p.n=0;p.sum=0;
+  if(slow&&this.dpr>QUALITY.floor+.05){QUALITY.cap=Math.max(QUALITY.floor,this.dpr-.35);this.resize(true);}
  }
  bindInput(){
   const signal=this.events.signal,on=(name,fn)=>this.canvas.addEventListener(name,fn,{signal});

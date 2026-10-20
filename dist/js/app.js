@@ -8,7 +8,8 @@ import {Soundscape} from './audio.js';
 import {revealDialog,dismissDialog} from './dialogs.js';
 import {icon,stars} from './icons.js';
 import {keySign} from './key-signs.js';
-import {WAGON_SKINS,SKIN_PRICE_LABEL,skinById,skinThumb} from './cosmetics.js';
+import {WAGON_SKINS,SKIN_PRICE_LABEL,SKIN_RECTS,SKIN_CELL,CLASSIC_THUMB,skinById} from './cosmetics.js';
+import {drawSkinBack,drawSkinFront} from './skin-effects.js';
 const app=document.querySelector('#app'),announcer=document.querySelector('#announcer'),catalog=levels.map(parseLevel),save=loadSave(),pref=save.settings,audio=new Soundscape(pref);
 let gesture=null,screen='home',selectedWorld=0,game=null,renderer=null,dialog=null,art={props:null,vehicles:null},lastMessage='',saveWarning=false;
 const commerce=new NativeCommerce(window),adPolicy=new AdPolicy(save.economy),COUNT=catalog.length;
@@ -17,7 +18,7 @@ const $=s=>document.querySelector(s),bind=(s,event,fn)=>$(s)?.addEventListener(e
 const announce=t=>{announcer.textContent='';requestAnimationFrame(()=>announcer.textContent=t);};
 const persist=()=>{if(!writeSave(save)&&!saveWarning){saveWarning=true;announce('İlerleme bu tarayıcıda kaydedilemiyor. Oynamaya devam edebilirsin.');}};
 const haptic=(n=9)=>{if(!pref.haptics)return;try{if(window.RotaHost?.haptic)window.RotaHost.haptic();else navigator.vibrate?.(n);}catch{}};
-const applyPreferences=()=>{document.documentElement.dataset.motion=pref.reducedMotion?'reduced':'full';audio.update(pref);if(renderer){renderer.settings=pref;renderer.dirty=true;}};
+const applyPreferences=()=>{document.documentElement.dataset.motion=pref.reducedMotion?'reduced':'full';audio.update(pref);if(renderer){renderer.settings=pref;renderer.terrainDirty=true;renderer.dirty=true;}};
 const button=(id,name,label,cls='')=>`<button id="${id}" class="icon-button ${cls}" aria-label="${label}" title="${label}">${icon(name)}</button>`;
 const brand=()=>`<button class="brand" id="brand-home" aria-label="Railquest ana ekran">${icon('train')}<span>RAILQUEST</span></button>`;
 const topbar=(back=false)=>`<header class="topbar"><div class="back-brand">${back?button('nav-back','back','Ana ekrana dön'):''}${brand()}</div><div class="top-actions">${button('sound-toggle',pref.sound?'sound':'mute','Oyun sesini aç veya kapat')}${button('settings','settings','Ayarlar')}${button('shop','noads','No Ads · Bölüm arası reklamları kaldır','noads-button')}</div></header>`;
@@ -248,6 +249,22 @@ async function finishRound(){
  }
  if(game===current){showWin();updateHUD();}
 }
+let garageFrame=0;
+/** Draws one carriage in a skin with its roof accessory and effects, fitted to the canvas box. */
+function paintSkin(canvas,skin,{t=0,moving=false}={}){
+ const W=canvas.clientWidth,H=canvas.clientHeight,dpr=Math.min(2,window.devicePixelRatio||1);if(!W||!H)return;
+ if(canvas.width!==Math.round(W*dpr)){canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);}
+ const c=canvas.getContext('2d'),classic=skin.row<0,img=classic?art.vehicles:art.skins;
+ c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);if(!img)return;
+ const [sx,sy,sw,sh]=classic?CLASSIC_THUMB.rect:SKIN_RECTS[0],s=Math.min(W/1.75,H/1.6),w=s*1.01,h=w*sh/sw;
+ c.save();c.translate(W/2,H*.86);
+ c.beginPath();c.ellipse(0,-s*.05,w*.45,s*.13,0,0,Math.PI*2);c.fillStyle='rgba(41,65,47,.18)';c.fill();
+ const fx={w,h,s,t,dir:0,moving,reduced:pref.reducedMotion};
+ if(!classic)drawSkinBack(c,skin.id,fx);
+ c.drawImage(img,sx,classic?sy:sy+skin.row*SKIN_CELL[1],sw,sh,-w/2,-h,w,h);
+ if(!classic)drawSkinFront(c,skin.id,fx);
+ c.restore();
+}
 function garageDialog(focus=equippedSkin()){
  openDialog('<div class="garage-root"></div>',()=>renderGarage(focus),'garage-dialog');
 }
@@ -258,7 +275,12 @@ function renderGarage(focus,message=''){
  const action=sel.id===equipped?`<button class="button button-outline" disabled>${icon('check')} Kullanılıyor</button>`
   :owned?`<button id="equip-skin" class="button button-green">${icon('check')} Kullan</button>`
   :`<button id="buy-skin" class="button button-yellow" ${commerce.native&&!commerce.state.billingReady?'disabled':''}>${commerce.native?(commerce.state.billingReady?`Satın al · ${escapeHtml(price(sel))}`:'Satın alma şu anda kullanılamıyor'):`Önizlemede aç · ${SKIN_PRICE_LABEL}`}</button>`;
- root.innerHTML=`<div class="garage-layout"><div class="garage-stage" style="--accent:${sel.accent}">${sel.seasonal?`<span class="season-tag">${icon('moon')} Cadılar Bayramı</span>`:''}<span class="garage-wagon" style="${skinThumb(sel,innerHeight<380?96:126)}"></span><h2>${sel.name}</h2><p>${sel.tagline}</p>${action}${!commerce.native&&!owned?'<p class="preview-note">Önizleme · Ödeme alınmaz, yalnız bu oturumda geçerli.</p>':''}${message?`<p class="shop-status" role="status">${escapeHtml(message)}</p>`:''}</div><div class="garage-shelf"><span class="eyebrow">VAGON GARAJI · TEK SEFERLİK</span><div class="skin-grid">${WAGON_SKINS.map(s=>`<button class="skin-card ${s.id===sel.id?'selected':''} ${s.id===equipped?'equipped':''}" data-skin="${s.id}" aria-pressed="${s.id===sel.id}" aria-label="${s.name}${ownsSkin(s)?'':`, ${escapeHtml(price(s))}`}" style="--accent:${s.accent}"><span class="skin-thumb" style="${skinThumb(s,innerHeight<380?40:52)}"></span><small>${s.id===equipped?`${icon('check')}Takılı`:ownsSkin(s)?'Senin':escapeHtml(price(s))}</small></button>`).join('')}</div>${commerce.native?'<button class="text-button" id="restore-skins">Satın alımları geri yükle</button>':''}</div></div>`;
+ root.innerHTML=`<div class="garage-layout"><div class="garage-stage" style="--accent:${sel.accent}">${sel.seasonal?`<span class="season-tag">${icon('moon')} Cadılar Bayramı</span>`:''}<canvas class="garage-wagon" aria-hidden="true"></canvas><h2>${sel.name}</h2><p>${sel.tagline}</p>${action}${!commerce.native&&!owned?'<p class="preview-note">Önizleme · Ödeme alınmaz, yalnız bu oturumda geçerli.</p>':''}${message?`<p class="shop-status" role="status">${escapeHtml(message)}</p>`:''}</div><div class="garage-shelf"><span class="eyebrow">VAGON GARAJI · TEK SEFERLİK</span><div class="skin-grid">${WAGON_SKINS.map(s=>`<button class="skin-card ${s.id===sel.id?'selected':''} ${s.id===equipped?'equipped':''}" data-skin="${s.id}" aria-pressed="${s.id===sel.id}" aria-label="${s.name}${ownsSkin(s)?'':`, ${escapeHtml(price(s))}`}" style="--accent:${s.accent}"><canvas class="skin-thumb" data-thumb="${s.id}" aria-hidden="true"></canvas><small>${s.id===equipped?`${icon('check')}Takılı`:ownsSkin(s)?'Senin':escapeHtml(price(s))}</small></button>`).join('')}</div>${commerce.native?'<button class="text-button" id="restore-skins">Satın alımları geri yükle</button>':''}</div></div>`;
+ root.querySelectorAll('[data-thumb]').forEach(el=>paintSkin(el,skinById(el.dataset.thumb),{t:.9,moving:true}));
+ // The stage plays the skin's accessories and effects live while the garage is open.
+ const stage=root.querySelector('.garage-wagon'),start=performance.now();cancelAnimationFrame(garageFrame);
+ const loop=now=>{if(!stage.isConnected)return;paintSkin(stage,sel,{t:(now-start)/1000,moving:true});if(!pref.reducedMotion)garageFrame=requestAnimationFrame(loop);};
+ loop(start);
  root.querySelectorAll('[data-skin]').forEach(el=>el.addEventListener('click',()=>{audio.effect('tap');renderGarage(el.dataset.skin);}));
  bind('#equip-skin','click',()=>{save.wagonSkin=sel.id;persist();applySkin();audio.effect('unlock');haptic();renderGarage(sel.id);});
  bind('#buy-skin','click',async()=>{
@@ -328,7 +350,7 @@ function openDialog(content,onReady=()=>{},className='',onDismiss=()=>{}){
  renderer?.input.cancel();
  if(dialog)closeDialog();const el=document.createElement('dialog');el.className=`game-dialog ${className}`;el.setAttribute('aria-label',className==='win-dialog'?'Bölüm tamamlandı':className==='settings-dialog'?'Ayarlar':'Oyun penceresi');el.innerHTML=`${button('dialog-close','close','Kapat','dialog-close')}<div class="dialog-inner">${content}</div>`;
  el.returnFocus=document.activeElement;el.backgroundInert=app.inert;el.previousOverflow=document.body.style.overflow;el.onDismiss=onDismiss;
- document.body.appendChild(el);dialog=el;if(game)game.overlay=true;
+ document.body.appendChild(el);dialog=el;if(game)game.overlay=true;if(renderer)renderer.suspended=true;
  el.addEventListener('cancel',e=>{e.preventDefault();closeDialog();});el.querySelector('#dialog-close').addEventListener('click',closeDialog);el.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeDialog));
  if(revealDialog(el)==='fallback'){
   el.shade=document.createElement('div');el.shade.className='dialog-shade';document.body.insertBefore(el.shade,el);app.inert=true;
@@ -343,7 +365,7 @@ function openDialog(content,onReady=()=>{},className='',onDismiss=()=>{}){
  try{onReady();if(!pref.reducedMotion&&el.animate)el.animate([{opacity:0,transform:'translateY(12px) scale(.95)'},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:220,easing:'cubic-bezier(.16,1,.3,1)'});el.querySelector('#dialog-close').focus({preventScroll:true});}catch(error){closeDialog();throw error;}
 }
 function closeDialog(){
- if(!dialog)return;const old=dialog;dialog=null;if(game)game.overlay=false;dismissDialog(old);old.shade?.remove();app.inert=old.backgroundInert;document.body.style.overflow=old.previousOverflow;
+ if(!dialog)return;const old=dialog;dialog=null;if(game)game.overlay=false;if(renderer){renderer.suspended=false;renderer.dirty=true;}dismissDialog(old);old.shade?.remove();app.inert=old.backgroundInert;document.body.style.overflow=old.previousOverflow;
  if(old.returnFocus?.isConnected)old.returnFocus.focus({preventScroll:true});old.onDismiss?.();
 }
 function specialRules(){
@@ -352,7 +374,7 @@ function specialRules(){
 }
 function settingsDialog(){openDialog(`<div class="dialog-title"><span class="dialog-emblem">${icon('settings')}</span><div><h2>Ayarlar</h2><p class="settings-intro">Yolculuğu kendine göre ayarla.</p></div></div><div class="settings-list">${[['sound','sound','Oyun sesleri','Raylar, düdükler ve buluşmalar'],['music','music','Müzik','Sakin bir yol arkadaşı'],['haptics','vibrate','Dokunma titreşimi','Destekleyen telefonlarda'],['weather','snow','Hava efektleri','Hafif kar, kum ve ortam ışıltıları'],['reducedMotion','leaf','Sakin görünüm','Daha az hareket; hava efektleri kapanır']].map(([k,g,title,desc])=>`<label class="setting-row"><span class="setting-icon">${icon(g)}</span><span class="setting-label"><strong>${title}</strong><small>${desc}</small></span><input type="checkbox" role="switch" aria-label="${title}" data-setting="${k}" ${pref[k]?'checked':''}><span class="toggle" aria-hidden="true"></span></label>`).join('')}</div><div class="settings-foot"><button class="text-button" id="settings-shop">${icon('noads')} No Ads</button><button class="text-button" id="privacy-options" ${commerce.state.privacyRequired?'':'hidden'}>${icon('lock')} Gizlilik</button><button class="text-button" id="about-game">${icon('leaf')} Hakkında</button><button class="button button-green" data-close>${icon('check')} Tamam</button></div><p class="settings-note">İlerlemen bu cihazda saklanır.</p>`,()=>{document.querySelectorAll('[data-setting]').forEach(el=>el.addEventListener('change',()=>{pref[el.dataset.setting]=el.checked;persist();applyPreferences();if(el.checked&&['music','sound'].includes(el.dataset.setting))audio.unlock();if($('#sound-toggle'))$('#sound-toggle').innerHTML=icon(pref.sound?'sound':'mute');}));bind('#about-game','click',aboutDialog);bind('#settings-shop','click',shopDialog);bind('#privacy-options','click',async()=>{closeDialog();await commerce.perform('privacy');settingsDialog();});},'settings-dialog');}
 function helpDialog(){openDialog(`<div class="dialog-title"><span class="dialog-emblem">${icon('train')}</span><div><span class="eyebrow">NASIL OYNANIR?</span><h2>Bir buluşma planla.</h2></div></div><div class="help-steps"><div><b>1</b><p><strong>Vagonu seç, rayını çiz.</strong>Vagondan başlayıp yan yana karelere sürükle. Eski bir raya dokunmak o hattı kısaltır.</p></div><div><b>2</b><p><strong>Lokomotifin arkasına bağla.</strong>Başka bir hatta bağlanınca devamındaki raylar ortak kullanılır; bütçeden bir kez düşer.</p></div><div><b>3</b><p><strong>1’den başlayarak sırayla.</strong>Hepsi aynı anda yola çıkar. Erken gelen vagona dolambaç kur. Aynı karede buluşmasınlar.</p></div></div><div class="help-notes"><p>${icon('bridge')}Köprülerde düz ilerle. Aynı harfli tüneller eşleşir; içinden geçmek bir adım sürer.</p><p>${icon('video')}Ray yetmezse kısa bir video izleyip +${EXTRA_RAILS} ray alabilirsin (bölüm başına ${EXTRA_USES} kez). Otomatik çöz de bir video ister.</p><p>${icon('clock')}Saatli peronda bir nokta 1, iki nokta 2 adım bekletir. Perona çizdiğin ray bütçeden düşer.</p><p>${icon('signal')}Sinyal karesinde kırmızıda bekle, yeşilde ayrıl. Oyun menüsündeki bölüm kurallarından ışık döngülerini görebilirsin.</p><p>${icon('arrow')}Ok işaretli geçitte yalnız ok yönünde düz ilerle. Sinyal ve ok karelerine de ray harcanır.</p><p>${icon('key')}Anahtarları istediğin vagonla alabilirsin. Anahtarın simgesi, açacağı bariyerleri gösterir. 1× köprüler ilk kullanımdan sonra çöker.</p><p>${icon('zoom')}Boş alanı tek parmakla sürükleyerek haritayı kaydır. Vagondan veya mevcut raydan sürüklemeye başladığında kamera sabit kalır. Alttaki − / + düğmeleriyle yakınlığı değiştir. Haritayı sığdırma seçeneği oyun menüsünde.</p></div><details><summary>Klavye ile oynama</summary><p>1–2–3–4–5–6: vagon seç. Oklar: kare seç. Enter / boşluk: ray ekle. Backspace: geri al. P: başlat / duraklat.</p></details><div class="sticky-actions"><button class="button button-green" data-close>${icon('check')} Anladım</button></div>`,()=>{},'help-dialog');}
-function aboutDialog(){openDialog(`<div class="dialog-title"><span class="dialog-emblem">${icon('leaf')}</span><div><span class="eyebrow">OYUN HAKKINDA</span><h2>Railquest</h2></div></div><p>${COUNT} özgün bulmaca, ${worlds.length} bölge ve birlikte yolculuk eden küçük vagonlar.</p><div class="about-copy"><p>${commerce.native?'Her dört tamamlanan bölümün ardından otomatik reklam gösterilir. No Ads bunları kaldırır; otomatik çözün isteğe bağlı ödüllü reklamları devam eder. Reklam hizmeti, gizlilik tercihlerine göre cihaz ve reklam verilerini işleyebilir.':'Bu web önizlemesi gerçek reklam göstermez ve ödeme almaz. No Ads denemesi yalnız bu oturumda geçerlidir.'} İlerleme bu cihazda saklanır. Tüm bölümler ücretsiz oynanabilir.</p><p>Çizimler bu oyun için üretildi. Müzik ve sesler oyun içinde oluşturulur.</p><p>Anahtarların Yolculuğu · Sürüm 0.11.0</p></div><button class="button button-green" data-close>Yolculuğa dön</button>`);}
+function aboutDialog(){openDialog(`<div class="dialog-title"><span class="dialog-emblem">${icon('leaf')}</span><div><span class="eyebrow">OYUN HAKKINDA</span><h2>Railquest</h2></div></div><p>${COUNT} özgün bulmaca, ${worlds.length} bölge ve birlikte yolculuk eden küçük vagonlar.</p><div class="about-copy"><p>${commerce.native?'Her dört tamamlanan bölümün ardından otomatik reklam gösterilir. No Ads bunları kaldırır; otomatik çözün isteğe bağlı ödüllü reklamları devam eder. Reklam hizmeti, gizlilik tercihlerine göre cihaz ve reklam verilerini işleyebilir.':'Bu web önizlemesi gerçek reklam göstermez ve ödeme almaz. No Ads denemesi yalnız bu oturumda geçerlidir.'} İlerleme bu cihazda saklanır. Tüm bölümler ücretsiz oynanabilir.</p><p>Çizimler bu oyun için üretildi. Müzik ve sesler oyun içinde oluşturulur.</p><p>Anahtarların Yolculuğu · Sürüm 0.12.0</p></div><button class="button button-green" data-close>Yolculuğa dön</button>`);}
 function pauseForBackground(){renderer?.input.cancel();if(game?.journey&&!game.journey.done){game.paused=true;updateHUD();setMessage('Yolculuk duraklatıldı. Hazır olduğunda devam et.');}saveDraft();audio.pause();}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseForBackground();});window.addEventListener('rota-pause',pauseForBackground);window.addEventListener('rota-portrait',()=>{if(dialog)closeDialog();pauseForBackground();});
 window.rotaBack=()=>{if(dialog){closeDialog();return true;}if(screen==='game'){gameMenu();return true;}if(screen==='map'){goHome();return true;}return false;};
