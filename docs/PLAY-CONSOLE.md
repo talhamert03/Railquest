@@ -25,7 +25,7 @@ Not: Sana gönderdiğim debug APK'nın paket kimliği `com.rotaadalari.game.dev`
 
 | Ürün kimliği | Ad | Fiyat |
 |---|---|---|
-| `rota_plus` | No Ads | Senin kararın (ör. 49,99 TRY) |
+| `rota_plus` | No Ads | 49,99 TRY |
 | `wagon_gold` | Altın Ekspres | 24,99 TRY |
 | `wagon_neon` | Neon Gece | 24,99 TRY |
 | `wagon_rosegold` | Gül Altını | 24,99 TRY |

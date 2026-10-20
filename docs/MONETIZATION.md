@@ -21,7 +21,7 @@ Hepsi **tüketilmeyen** (one-time, non-consumable) uygulama içi ürün; satın 
 
 | Ürün kimliği | Görünen ad |
 |---|---|
-| `rota_plus` | No Ads |
+| `rota_plus` | No Ads (49,99 TRY) |
 | `wagon_gold` | Altın Ekspres |
 | `wagon_neon` | Neon Gece |
 | `wagon_rosegold` | Gül Altını |
