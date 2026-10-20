@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {verifyPurchase} from '../billing-server/verification.mjs';
 const valid=()=>({purchaseStateContext:{purchaseState:'PURCHASED'},productLineItem:[{productId:'rota_plus',productOfferDetails:{refundableQuantity:1,consumptionState:'CONSUMPTION_STATE_YET_TO_BE_CONSUMED'}}],acknowledgementState:'ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED'});
 const response=(body,status=200)=>new Response(JSON.stringify(body),{status});
-const verify=(body,extra={})=>verifyPurchase({token:'valid-purchase-token',packageName:'com.rotaadalari.game',now:1000,google:async()=>response(body),...extra});
+const verify=(body,extra={})=>verifyPurchase({token:'valid-purchase-token',packageName:'com.railquest.game',now:1000,google:async()=>response(body),...extra});
 test('only the server-verified non-consumable opens No Ads',async()=>{
  const result=await verify(valid());assert.equal(result.body.entitled,true);assert.equal(result.body.productId,'rota_plus');assert.equal(result.body.validUntil,1000+72*3600000);
 });
@@ -17,7 +17,7 @@ test('test cards are rejected unless the verifier is explicitly configured for P
 test('unacknowledged purchases are acknowledged before a successful entitlement response; repeat restore is idempotent',async()=>{
  const data=valid();data.acknowledgementState='ACKNOWLEDGEMENT_STATE_PENDING';const calls=[];
  const result=await verify(data,{google:async(url,options)=>{calls.push({url,options});return options?.method==='POST'?new Response(null,{status:204}):response(data);}});
- assert.equal(result.body.entitled,true);assert.equal(calls.length,2);assert.match(calls[0].url,/applications\/com.rotaadalari.game\/purchases\/productsv2\/tokens\/valid-purchase-token$/);assert.match(calls[1].url,/products\/rota_plus\/tokens\/valid-purchase-token:acknowledge$/);
+ assert.equal(result.body.entitled,true);assert.equal(calls.length,2);assert.match(calls[0].url,/applications\/com.railquest.game\/purchases\/productsv2\/tokens\/valid-purchase-token$/);assert.match(calls[1].url,/products\/rota_plus\/tokens\/valid-purchase-token:acknowledge$/);
  assert.equal((await verify(valid())).body.entitled,true);
 });
 test('verification outages fail closed, revoked tokens deny access and malformed tokens do not call Google',async()=>{

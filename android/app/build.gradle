@@ -13,7 +13,7 @@ android {
     namespace 'com.rotaadalari.game'
     compileSdk 36
     defaultConfig {
-        applicationId 'com.rotaadalari.game'
+        applicationId 'com.railquest.game'
         minSdk 26
         targetSdk 36
         versionCode 17

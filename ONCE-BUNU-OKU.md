@@ -1,6 +1,6 @@
 # Railquest — Android Studio paketi
 
-Sürüm 0.14.0 · versionCode 17 · paket kimliği `com.rotaadalari.game` · 58 bölüm · 6 bölge
+Sürüm 0.14.0 · versionCode 17 · paket kimliği `com.railquest.game` · 58 bölüm · 6 bölge
 
 ## Android Studio'da aç
 

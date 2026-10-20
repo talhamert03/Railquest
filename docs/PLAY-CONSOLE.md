@@ -9,7 +9,7 @@ Bu ekranın çalışması için ürünlerin Play Console'da **aynı kimliklerle*
 Play Console, uygulamanın ödeme izni taşıyan bir sürümü yüklenmeden ürün açmana izin vermez. Bu yüzden:
 
 1. **Ödeme profili:** Play Console → Ayarlar → Ödeme profili (Payments profile). Satış yapabilmek için banka ve vergi bilgileri tamamlanmış bir satıcı profili gerekir.
-2. **İmzalı yayın paketi (AAB) üret:** Android Studio'da `android` klasörünü aç → Build → Generate Signed Bundle / APK → Android App Bundle → `release`. İlk kez yapıyorsan sihirbazda yeni bir yükleme anahtarı (keystore) oluştur. **Anahtar dosyasını ve şifresini kaybetme**, her güncellemede aynı anahtar gerekir. Paket kimliği `com.rotaadalari.game`, sürüm kodu 17 olmalı.
+2. **İmzalı yayın paketi (AAB) üret:** Android Studio'da `android` klasörünü aç → Build → Generate Signed Bundle / APK → Android App Bundle → `release`. İlk kez yapıyorsan sihirbazda yeni bir yükleme anahtarı (keystore) oluştur. **Anahtar dosyasını ve şifresini kaybetme**, her güncellemede aynı anahtar gerekir. Paket kimliği `com.railquest.game`, sürüm kodu 17 olmalı.
 3. **Dahili test kanalına yükle:** Play Console → Test et ve yayınla → Test → Dahili test → Yeni sürüm oluştur → AAB'yi yükle → Yayınla. Bu yükleme ödeme iznini Play'e tanıtır.
 4. **Ürünleri aç:** Play Console → Para kazanma (Monetize with Play) → Ürünler → Tek seferlik ürünler (One-time products / In-app products) → Ürün oluştur. Aşağıdaki her satır için:
    - **Ürün kimliği:** tabloda yazdığı gibi, harfi harfine. Kimlik sonradan değiştirilemez.
@@ -19,7 +19,7 @@ Play Console, uygulamanın ödeme izni taşıyan bir sürümü yüklenmeden ür�
    - Kaydet ve **Etkinleştir**.
 5. **Test et:** Play Console → Ayarlar → Lisans testi → kendi Gmail adresini ekle. Dahili test bağlantısından (Dahili test → Test kullanıcıları → bağlantıyı kopyala) uygulamayı telefona **Play Store üzerinden** kur. Lisans test hesabıyla satın almalar gerçek para çekmez.
 
-Not: Sana gönderdiğim debug APK'nın paket kimliği `com.rotaadalari.game.dev` olduğu için Play ürünlerini hiçbir zaman göremez. Satın alma testi yalnız Play'den kurulan yayın sürümüyle yapılır.
+Not: Sana gönderdiğim debug APK'nın paket kimliği `com.railquest.game.dev` olduğu için Play ürünlerini hiçbir zaman göremez. Satın alma testi yalnız Play'den kurulan yayın sürümüyle yapılır.
 
 ## Ürün listesi
 

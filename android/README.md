@@ -6,7 +6,7 @@ Bu klasör, test APK’sı derlenebilen Android kaynak projesidir. Fiziksel ciha
 
 | Alan | Değer |
 |---|---|
-| Uygulama kimliği | `com.rotaadalari.game` — ilk mağaza yüklemesinden önce sahip tarafından kesinleştirilecek |
+| Uygulama kimliği | `com.railquest.game` (kod paketi `com.rotaadalari.game` olarak kalır) |
 | Ekran yönü | `sensorLandscape` — iki yatay yön |
 | Minimum Android | API 26 / Android 8.0; güncel Android System WebView gerekir |
 | Hedef / derleme SDK | API 36 |
@@ -63,4 +63,4 @@ Canlı etkinleştirme ve kabul matrisi: `../docs/MONETIZATION.md`. Bu kaynaklar�
 
 Android 11 ve üzerinde `WindowInsetsController`, eski sürümlerde immersive-sticky bayrakları kullanılır. Sistem çubukları kenardan kaydırmayla geçici görünür; oyun kamerasını küçültmez. Çentik alanı WebView dışında bir kez ayrılır. WebView yakınlaştırması kapalıdır; sayfa ayrıca çoklu dokunma/gesture büyütmesini engeller. Rehber: https://developer.android.com/develop/ui/views/layout/immersive
 
-Yeni test APK’sının uygulama kimliği `com.rotaadalari.game.dev` olarak korunur. Önceki 0.8.0 test APK’sıyla aynı test anahtarı kullanılır; güncelleme kurulumu uygulama verilerini korur. Bu anahtar Google Play yayın anahtarı değildir.
+Yeni test APK’sının uygulama kimliği `com.railquest.game.dev`. Önceki 0.8.0 test APK’sıyla aynı test anahtarı kullanılır; güncelleme kurulumu uygulama verilerini korur. Bu anahtar Google Play yayın anahtarı değildir.
