@@ -4,9 +4,9 @@ import {defaults,normalizeSave,homeDestination,recordWin,writeSave,loadSave} fro
 import {guardGameGestures} from '../dist/js/viewport.js';
 test('first play opens chapter selection; returning players keep the exact last selected level',()=>{
  const fresh=defaults();assert.deepEqual(homeDestination(fresh),{screen:'map',level:1});
- fresh.hasStarted=true;fresh.lastLevel=17;fresh.drafts[17]={1:['3,2','4,2']};fresh.settings.sound=false;fresh.economy.roundsTowardAd=4;
+ fresh.hasStarted=true;fresh.lastLevel=17;fresh.drafts[17]={1:['3,2','4,2']};fresh.settings.sound=false;fresh.economy.roundsTowardAd=3;
  const stored=new Map(),storage={getItem:k=>stored.get(k),setItem:(k,v)=>stored.set(k,v)};
- writeSave(fresh,storage);const again=loadSave(storage);assert.deepEqual(homeDestination(again),{screen:'game',level:17});assert.deepEqual(again.drafts,fresh.drafts);assert.equal(again.economy.roundsTowardAd,4);assert.equal(again.settings.sound,false);
+ writeSave(fresh,storage);const again=loadSave(storage);assert.deepEqual(homeDestination(again),{screen:'game',level:17});assert.deepEqual(again.drafts,fresh.drafts);assert.equal(again.economy.roundsTowardAd,3);assert.equal(again.settings.sound,false);
  recordWin(again,17,3,13);assert.deepEqual(homeDestination(again),{screen:'game',level:18});
  recordWin(again,58,3,51);assert.equal(homeDestination(again).level,58);
 });

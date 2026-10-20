@@ -28,8 +28,8 @@ test('signals reject zero-length green, invalid phases, missing timing and off-m
  assert.throws(()=>parseLevel({...data,signals:{}}));assert.throws(()=>parseLevel({...data,signals:{...data.signals,'8,8':data.signals['1,0']}}));
 });
 test('six-wagon drafts, last chapter, weather preference and the ad counter survive reload',()=>{
- const saved=defaults();saved.drafts[52]=levels[51].solution;saved.lastLevel=52;saved.settings.weather=false;saved.economy.roundsTowardAd=4;
+ const saved=defaults();saved.drafts[52]=levels[51].solution;saved.lastLevel=52;saved.settings.weather=false;saved.economy.roundsTowardAd=3;
  const restored=normalizeSave(JSON.parse(JSON.stringify(saved)));
- assert.deepEqual(restored.drafts[52],levels[51].solution);assert.equal(restored.lastLevel,52);assert.equal(restored.settings.weather,false);assert.equal(restored.economy.roundsTowardAd,4);
+ assert.deepEqual(restored.drafts[52],levels[51].solution);assert.equal(restored.lastLevel,52);assert.equal(restored.settings.weather,false);assert.equal(restored.economy.roundsTowardAd,3);
  assert.equal(normalizeSave({version:2,settings:{sound:false}}).settings.weather,true);
 });
