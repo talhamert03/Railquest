@@ -1,10 +1,11 @@
-/** One interstitial opportunity after every five completed, unassisted rounds. */
+/** One interstitial opportunity after every four completed, unassisted rounds. */
 import {cloneRoutes,simulate} from './engine.js';
-export const AD_POLICY=Object.freeze({roundsPerAd:5});
+export const AD_POLICY=Object.freeze({roundsPerAd:4,legacyRoundsPerAd:5});
 export const economyDefaults=()=>({version:4,roundsTowardAd:0});
 export function normalizeEconomy(raw){
  const out=economyDefaults();
- if(raw?.version===4&&Number.isInteger(raw.roundsTowardAd)&&raw.roundsTowardAd>=0&&raw.roundsTowardAd<AD_POLICY.roundsPerAd)out.roundsTowardAd=raw.roundsTowardAd;
+ // Saves from the five-round cadence keep their progress; a full counter means the next completion shows the ad.
+ if(raw?.version===4&&Number.isInteger(raw.roundsTowardAd)&&raw.roundsTowardAd>=0&&raw.roundsTowardAd<AD_POLICY.legacyRoundsPerAd)out.roundsTowardAd=Math.min(raw.roundsTowardAd,AD_POLICY.roundsPerAd-1);
  return out;
 }
 export class AdPolicy{

@@ -1,7 +1,7 @@
 import {levels} from './levels.js';
 import {economyDefaults,normalizeEconomy} from './monetization.js';
 const KEY='rota-adalari.save.v2',LEGACY='rota-adalari.save.v1',COUNT=levels.length;
-export const defaults=()=>({version:2,completed:{},lastLevel:1,hasStarted:false,drafts:{},economy:economyDefaults(),settings:{sound:true,music:true,haptics:true,weather:true,reducedMotion:typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches}});
+export const defaults=()=>({version:2,completed:{},lastLevel:1,hasStarted:false,drafts:{},boosts:{},economy:economyDefaults(),settings:{sound:true,music:true,haptics:true,weather:true,reducedMotion:typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches}});
 const validId=id=>/^\d+$/.test(id)&&Number(id)>=1&&Number(id)<=COUNT;
 export function normalizeSave(raw){
  const out=defaults();if(!raw||typeof raw!=='object')return out;
@@ -16,6 +16,8 @@ export function normalizeSave(raw){
   if(!validId(id)||!routes||typeof routes!=='object'||Array.isArray(routes)||Object.keys(routes).length>6)continue;
   if(Object.entries(routes).every(([n,p])=>/^[1-6]$/.test(n)&&Array.isArray(p)&&p.length>0&&p.length<200&&p.every(k=>typeof k==='string'&&/^\d{1,2},\d{1,2}$/.test(k))))out.drafts[id]=routes;
  }
+ // Rewarded rail boosts are per level, in whole video rewards (3 rails each, at most 3 videos).
+ for(const [id,n] of Object.entries(raw.boosts||{}))if(validId(id)&&Number.isInteger(n)&&n>0&&n<=9&&n%3===0)out.boosts[id]=n;
  out.hasStarted=raw.hasStarted===true||out.lastLevel>1||Object.keys(out.completed).length>0||Object.keys(out.drafts).length>0;
  return out;
 }

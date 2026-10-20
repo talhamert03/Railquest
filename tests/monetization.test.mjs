@@ -5,41 +5,41 @@ import {defaults,normalizeSave,recordWin,nextLevel} from '../dist/js/storage.js'
 import {levels} from '../dist/js/levels.js';
 import {parseLevel,simulate} from '../dist/js/engine.js';
 
-test('the fifth, tenth and fifteenth completed rounds create the automatic ad opportunity',()=>{
+test('the fourth, eighth and twelfth completed rounds create the automatic ad opportunity',()=>{
  const e=economyDefaults(),p=new AdPolicy(e),boundaries=[];
- for(let i=1;i<=16;i++)if(p.complete(`round-${i}`))boundaries.push(i);
- assert.deepEqual(boundaries,[5,10,15]);assert.equal(e.roundsTowardAd,1);
+ for(let i=1;i<=13;i++)if(p.complete(`round-${i}`))boundaries.push(i);
+ assert.deepEqual(boundaries,[4,8,12]);assert.equal(e.roundsTowardAd,1);
 });
 test('replaying a level counts, but duplicate completion callbacks do not',()=>{
  const e=economyDefaults(),p=new AdPolicy(e);
- for(let i=1;i<=5;i++){
-  assert.equal(p.complete(`level-1-play-${i}`),i===5);
+ for(let i=1;i<=4;i++){
+  assert.equal(p.complete(`level-1-play-${i}`),i===4);
   assert.equal(p.complete(`level-1-play-${i}`),false);
  }
  assert.equal(e.roundsTowardAd,0);assert.equal(p.complete(null),false);
 });
-test('four completions survive a restart and the next completion is the ad boundary',()=>{
+test('three completions survive a restart and the next completion is the ad boundary',()=>{
  const save=defaults(),p=new AdPolicy(save.economy);
- for(let i=0;i<4;i++)p.complete(`round-${i}`);
+ for(let i=0;i<3;i++)p.complete(`round-${i}`);
  const restored=normalizeSave(JSON.parse(JSON.stringify(save)));
  assert.equal(new AdPolicy(restored.economy).complete('next-session'),true);
  assert.equal(restored.economy.roundsTowardAd,0);
 });
 test('No Ads suppresses automatic ads and resets the counter',()=>{
- const e={version:4,roundsTowardAd:4},p=new AdPolicy(e);
+ const e={version:4,roundsTowardAd:3},p=new AdPolicy(e);
  for(let i=0;i<20;i++)assert.equal(p.complete(`paid-${i}`,{noAds:true}),false);
  assert.equal(e.roundsTowardAd,0);
- for(let i=1;i<=5;i++)assert.equal(p.complete(`free-${i}`),i===5);
+ for(let i=1;i<=4;i++)assert.equal(p.complete(`free-${i}`),i===4);
 });
-test('a rewarded auto-solve never adds a second ad or consumes the four pending completions',()=>{
- const e={version:4,roundsTowardAd:4},p=new AdPolicy(e);
+test('a rewarded auto-solve never adds a second ad or consumes the three pending completions',()=>{
+ const e={version:4,roundsTowardAd:3},p=new AdPolicy(e);
  for(let i=0;i<5;i++)assert.equal(p.complete(`assisted-${i}`,{assisted:true}),false);
- assert.equal(e.roundsTowardAd,4);assert.equal(p.complete('next-unassisted'),true);
+ assert.equal(e.roundsTowardAd,3);assert.equal(p.complete('next-unassisted'),true);
 });
 test('a no-fill boundary is consumed once; no immediate retry or progress lock',()=>{
- const e={version:4,roundsTowardAd:4},p=new AdPolicy(e);
+ const e={version:4,roundsTowardAd:3},p=new AdPolicy(e);
  assert.equal(p.complete('no-fill'),true);assert.equal(p.complete('no-fill'),false);
- for(let i=1;i<=5;i++)assert.equal(p.complete(`next-${i}`),i===5);
+ for(let i=1;i<=4;i++)assert.equal(p.complete(`next-${i}`),i===4);
 });
 test('cancelled, unavailable, forged purchase status and stale rewards grant no auto-solve',()=>{
  const l=parseLevel(levels.at(-1)),proof=JSON.stringify(l.solution);
@@ -62,6 +62,9 @@ test('old progress, settings, four-wagon drafts and all campaign completions rou
  assert.deepEqual(s.economy,economyDefaults());s.drafts[44]=levels[43].solution;recordWin(s,43,3,35);
  const reloaded=normalizeSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(reloaded.drafts[44],levels[43].solution);assert.equal(reloaded.completed[43].stars,3);
  const full=defaults();for(let id=1;id<=levels.length;id++)recordWin(full,id,3,10);assert.equal(nextLevel(full),levels.length);
+});
+test('a full counter saved under the old five-round cadence shows the ad on the next completion',()=>{
+ const e=normalizeEconomy({version:4,roundsTowardAd:4});assert.equal(e.roundsTowardAd,3);assert.equal(new AdPolicy(e).complete('after-update'),true);
 });
 test('malformed and legacy economy never grant ownership, guide unlocks or reward credits',()=>{
  for(const raw of [null,{version:3,roundsTowardAd:4,guideCredits:999,guides:{44:true}},{version:4,roundsTowardAd:-1},{version:4,roundsTowardAd:5},{version:4,roundsTowardAd:2.5},{version:4,roundsTowardAd:'4',noAds:true}])assert.deepEqual(normalizeEconomy(raw),economyDefaults());

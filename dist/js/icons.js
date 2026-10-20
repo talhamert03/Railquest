@@ -40,6 +40,7 @@ const paths={
  vibrate:'<rect x="8" y="3" width="8" height="18" rx="2"/><path d="m4 7-2 3 2 3-2 3m18-9 2 3-2 3 2 3"/>',
  train:'<rect x="5" y="3" width="14" height="15" rx="4"/><path d="M5 10h14M8 21l2-3m6 3-2-3"/><circle cx="9" cy="14" r="1"/><circle cx="15" cy="14" r="1"/>',
  flag:'<path d="M5 22V3c6-5 8 5 15 0v11c-7 5-9-5-15 0"/>',
+ video:'<rect x="2" y="5" width="14" height="14" rx="3"/><path d="m16 10 6-3.5v11L16 14Z" fill="currentColor"/><path d="m7 9 5 3-5 3Z" fill="currentColor" stroke="none"/>',
  zoom:'<circle cx="10" cy="10" r="6"/><path d="m15 15 6 6M7 10h6m-3-3v6"/>'
 };
 export const icon=(name,cls='')=>`<svg class="icon ${cls}" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.star}</svg>`;

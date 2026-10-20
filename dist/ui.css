@@ -202,6 +202,22 @@ button:focus-visible,canvas:focus-visible,summary:focus-visible,input:focus-visi
 .rail-counter.low>strong{color:#a76d16}
 .rail-counter.empty{background:linear-gradient(#ffe4d8,#ffd0bd);box-shadow:0 4px 0 var(--coral-lip);animation:nudge .4s}
 .rail-counter.empty>strong{color:var(--coral-lip)}
+/* Rewarded "+3 ray": the video badge says up front that an ad plays. */
+.extra-rails{--lip:4px;position:relative;display:flex;align-items:center;gap:5px;flex:none;min-height:var(--touch);padding:4px 12px 4px 5px;border-radius:18px;border:2px solid #fff1c0;background:linear-gradient(var(--sun),var(--sun-2));box-shadow:0 var(--lip) 0 var(--sun-lip),0 8px 12px rgba(36,73,63,.16);color:var(--sun-ink);white-space:nowrap}
+.extra-rails:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--sun-lip)}
+.extra-rails>.icon{width:34px;height:34px;padding:6px;border-radius:12px;background:#3b2f1a;color:#ffd977}
+.extra-rails>b{font-size:20px;font-weight:800;line-height:1}
+.extra-rails>small{font-size:11px;font-weight:700;opacity:.8}
+.extra-rails.nudge{animation:pulse-sun 1.1s ease-in-out infinite}
+.rail-counter.gain{animation:gain .6s cubic-bezier(.2,1.6,.4,1)}
+.ad-badge{position:absolute;top:-7px;right:-7px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#3b2f1a;border:2px solid #fff8e6;box-shadow:0 2px 0 rgba(36,73,63,.25);color:#ffd977}
+.ad-badge .icon{width:15px;height:15px}
+.pause-action{position:relative}
+.pause-action.rewarded{--lip-color:var(--sun-lip);background:linear-gradient(#fff1c2,#ffd977);border-color:#fff4cc;box-shadow:0 var(--lip) 0 var(--sun-lip),0 8px 10px rgba(36,73,63,.1)}
+.pause-action.rewarded>.icon{color:#8a5a12}
+.pause-action.rewarded:disabled .ad-badge{display:none}
+.pause-fullscreen{position:absolute;top:14px;right:14px;--lip:3px;width:40px;height:40px;min-height:40px;border-radius:14px}
+.pause-fullscreen .icon{width:20px;height:20px}
 .puzzle-canvas{position:relative;min-width:0;min-height:0;overflow:hidden;margin-inline:calc(-1 * max(var(--edge),env(safe-area-inset-left)))}
 .puzzle-canvas canvas{display:block;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;outline-offset:-4px}
 .puzzle-canvas canvas[data-gesture=pan]{cursor:grabbing}
@@ -242,11 +258,14 @@ button:focus-visible,canvas:focus-visible,summary:focus-visible,input:focus-visi
 .puzzle-message.quiet{opacity:0;transform:translate(-50%,-6px)}
 
 /* ---------- Dialogs ---------- */
-.game-dialog{position:fixed;inset:0;margin:auto;width:min(560px,calc(100% - 32px));height:fit-content;max-height:calc(var(--app-height) - 20px);padding:0;border:2px solid #fffdf2;border-radius:28px;background:linear-gradient(var(--cream),var(--cream-2));color:var(--ink);box-shadow:0 6px 0 var(--paper-lip),0 30px 70px rgba(20,50,40,.35);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.game-dialog{position:fixed;inset:0;margin:auto;width:min(560px,calc(100% - 32px));height:fit-content;max-height:calc(var(--app-height) - 20px);max-height:min(calc(var(--app-height) - 20px),calc(100vh - 20px));padding:0;border:2px solid #fffdf2;border-radius:28px;background:linear-gradient(var(--cream),var(--cream-2));color:var(--ink);box-shadow:0 6px 0 var(--paper-lip),0 30px 70px rgba(20,50,40,.35);overflow:hidden}
+/* The panel never scrolls; only its content does, so the close button always stays whole and in place. */
+.game-dialog[open]{display:flex;flex-direction:column}
+.game-dialog>.dialog-inner{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .game-dialog::backdrop{background:rgba(32,70,62,.5);backdrop-filter:blur(4px)}
 .dialog-shade{position:fixed;inset:0;z-index:90;background:rgba(32,70,62,.55)}
-.game-dialog.dialog-fallback{display:block;z-index:91}
-.dialog-close{position:absolute;right:12px;top:12px;z-index:2;width:40px;height:40px;min-height:40px;border-radius:50%;--lip:3px}
+.game-dialog.dialog-fallback{display:flex;flex-direction:column;z-index:91}
+.dialog-close{position:absolute;right:12px;top:12px;z-index:5;width:40px;height:40px;min-width:40px;min-height:40px;border-radius:50%;--lip:3px}
 .dialog-close .icon{width:19px;height:19px}
 .dialog-inner{padding:24px 26px 22px;text-align:center}
 .dialog-inner h2{margin:0 0 10px;font-size:25px;font-weight:800;line-height:1.15;letter-spacing:-.3px}
@@ -377,7 +396,7 @@ summary{cursor:pointer;padding:8px 2px;font-weight:600}
 .shop-copy>.text-button{display:flex;margin:4px auto 0}
 
 /* Win */
-.win-dialog{width:min(680px,calc(100% - 28px));overflow:hidden auto}
+.win-dialog{width:min(680px,calc(100% - 28px))}
 .win-dialog .dialog-inner{display:grid;grid-template-columns:minmax(150px,.75fr) minmax(0,1.5fr);gap:12px 20px;align-items:center;padding:22px 26px}
 .win-portrait{position:relative;display:grid;place-items:center;aspect-ratio:1;width:100%;max-width:210px;margin:auto}
 .win-portrait::before{content:"";position:absolute;inset:-6%;border-radius:50%;background:repeating-conic-gradient(from 0deg,#ffe7a0 0 12deg,#fff4cf 12deg 24deg);animation:spin 18s linear infinite;-webkit-mask-image:radial-gradient(circle,#000 55%,transparent 71%);mask-image:radial-gradient(circle,#000 55%,transparent 71%)}
@@ -409,6 +428,8 @@ summary{cursor:pointer;padding:8px 2px;font-weight:600}
 .ad-preview{width:min(600px,calc(100% - 28px))}
 
 /* ---------- Animations ---------- */
+@keyframes pulse-sun{0%,100%{transform:scale(1);box-shadow:0 4px 0 var(--sun-lip),0 0 0 0 rgba(255,204,77,.7)}50%{transform:scale(1.06);box-shadow:0 4px 0 var(--sun-lip),0 0 0 8px rgba(255,204,77,0)}}
+@keyframes gain{0%{transform:scale(1)}40%{transform:scale(1.15)}100%{transform:scale(1)}}
 @keyframes float-y{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 @keyframes island-drift{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,calc(-50% - 6px))}}
 @keyframes cloud-drift{from{translate:-140px 0}to{translate:calc(100vw + 40px) 0}}
@@ -479,11 +500,20 @@ summary{cursor:pointer;padding:8px 2px;font-weight:600}
  .dock-tools .icon-button,.dock-tools .speed-button{width:38px}
  .dock-center{gap:6px}
  .puzzle-message{max-width:calc(100% - 60px)}
+ .extra-rails>small{display:none}
+ .extra-rails{padding-right:9px}
+ .extra-rails>.icon{width:30px;height:30px}
+ .rail-counter>span{display:none}
  .pause-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
  .pause-action{font-size:11.5px}
  .help-notes{grid-template-columns:1fr}
 }
 @media (max-width:700px){
+ .puzzle-wagons{gap:4px;padding-inline:5px}
+ .wagon-button{width:34px}
+ .wagon-button>span{font-size:17px}
+ .dock-tools{gap:4px}
+ .dock-tools .icon-button,.dock-tools .speed-button{width:36px}
  .home-conductor .speech{display:none}
  .chapter-progress small{display:none}
  .menu-score small{display:none}
