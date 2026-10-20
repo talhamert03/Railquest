@@ -28,8 +28,8 @@ final class BillingController {
     static final String NO_ADS="rota_plus";
     // Must match SKIN_PRODUCTS in dist/js/cosmetics.js (checked by tests/billing.test.mjs).
     static final List<String> SKINS=Collections.unmodifiableList(Arrays.asList(
-        "wagon_dragon","wagon_unicorn","wagon_galaxy","wagon_halloween","wagon_icequeen",
-        "wagon_sakura","wagon_mermaid","wagon_royal","wagon_candy","wagon_firefly"));
+        "wagon_gold","wagon_neon","wagon_rosegold","wagon_lava","wagon_emerald",
+        "wagon_ruby","wagon_pearl","wagon_galaxy","wagon_frost","wagon_halloween"));
     static final List<String> PRODUCTS;
     static { List<String> all=new ArrayList<>();all.add(NO_ADS);all.addAll(SKINS);PRODUCTS=Collections.unmodifiableList(all); }
     private static final long LOCAL_GRACE=30L*24*3600000L, SERVER_GRACE=72L*3600000L;

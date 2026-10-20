@@ -6,8 +6,8 @@ import {vehiclePose,easeConvoy} from './vehicle-motion.js';
 import {keySign} from './key-signs.js';
 import {BoardCamera} from './camera.js';
 import {BoardGesture} from './board-gesture.js';
-import {SKIN_RECTS,SKIN_CELL,skinById} from './cosmetics.js';
-import {drawSkinBack,drawSkinFront} from './skin-effects.js';
+import {SKIN_RECTS,skinById} from './cosmetics.js';
+import {drawSkinnedCar} from './skin-effects.js';
 const RECT={tree:[31,54,332,402],pine:[402,33,356,425],stones:[819,191,326,263],flowers:[1208,224,304,209],tunnelE:[10,554,368,371],tunnelS:[401,553,367,371],station:[772,559,516,393],sign:[1311,538,179,407]};
 const VEHICLES=[[30,79,344,370],[409,79,340,370],[791,85,332,370],[1185,82,333,367],[35,586,328,338],[423,586,326,340],[801,583,322,344],[1189,581,320,344]];
 /** Canvas resolution budget, shared by every board. Lowered once if a device cannot keep up. */
@@ -259,15 +259,12 @@ export class IslandRenderer{
   if(!this.art.vehicles)return;
   const {x,y,dir=0,alpha=1}=pos,p=this.project(x,y),s=this.size,pose=vehiclePose({time:this.motionTime||0,distance:pos.distance??x+y,moving:pos.moving,selected:pos.selected,engine,reducedMotion:this.settings.reducedMotion});
   ctx.save();ctx.globalAlpha=alpha;ctx.beginPath();ctx.ellipse(p.x,p.y+s*.02,s*.49,s*.20,0,0,TAU);ctx.fillStyle='rgba(41,65,47,.20)';ctx.fill();
-  // Carriages may wear a purchased skin; the engine always keeps the original art.
+  // Carriages may wear a purchased livery; the engine always keeps the original art.
   const skin=!engine&&this.art.skins?skinById(this.skin):null,skinned=skin&&skin.row>=0;
-  let [sx,sy,sw,sh]=skinned?SKIN_RECTS[dir%4]:VEHICLES[(engine?0:4)+(dir%4)];if(skinned)sy+=skin.row*SKIN_CELL[1];
-  const w=s*(engine?1.13:1.01),h=w*sh/sw;
+  const [sx,sy,sw,sh]=skinned?SKIN_RECTS[dir%4]:VEHICLES[(engine?0:4)+(dir%4)],w=s*(engine?1.13:1.01),h=w*sh/sw;
   ctx.translate(p.x,p.y+s*.22);ctx.rotate(pose.tilt);ctx.scale(1,pose.scaleY);ctx.translate(0,-s*pose.lift);
-  const fx=skinned?{w,h,s,t:this.motionTime||0,dir,moving:!!pos.moving,reduced:this.settings.reducedMotion}:null;
-  if(fx)drawSkinBack(ctx,skin.id,fx);
-  ctx.drawImage(skinned?this.art.skins:this.art.vehicles,sx,sy,sw,sh,-w/2,-h,w,h);
-  if(fx)drawSkinFront(ctx,skin.id,fx);
+  if(skinned)drawSkinnedCar(ctx,this.art,skin,w,h,{t:this.motionTime||0,dir,s,reduced:this.settings.reducedMotion,seed:id});
+  else ctx.drawImage(this.art.vehicles,sx,sy,sw,sh,-w/2,-h,w,h);
   ctx.restore();
   if(!engine&&alpha>.4)this.badge(ctx,x,y,String(id),CAR_COLORS[id-1],1.01+pose.lift);
  }

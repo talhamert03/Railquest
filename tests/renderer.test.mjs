@@ -111,7 +111,7 @@ test('touching another wagon selects its track without moving the camera; keyboa
 });
 test('carriages draw from the skin atlas when a skin is chosen; the engine keeps its own art',async()=>{
  const skins=await loadImage(new URL('../dist/assets/wagon-skins.webp',import.meta.url).pathname);
- const r=setup(720,300),level=parseLevel(levels[24]);r.art={...r.art,skins};r.skin='halloween';r.setLevel(level,{routes:level.solution,selected:1,journey:null});
+ const r=setup(720,300),level=parseLevel(levels[24]);r.art={...r.art,skins};r.skin='halloween';r.settings.reducedMotion=true;r.setLevel(level,{routes:level.solution,selected:1,journey:null});
  const used=[];const draw=r.ctx.drawImage.bind(r.ctx);r.ctx.drawImage=(img,...rest)=>{used.push(img);return draw(img,...rest);};
  r.draw(0,.016);assert.ok(used.includes(skins));assert.ok(used.includes(r.art.vehicles));
  used.length=0;r.skin='classic';r.terrainDirty=true;r.draw(.1,.016);assert.ok(!used.includes(skins));r.dispose();

@@ -1,59 +1,66 @@
-"""Builds dist/assets/wagon-skins.webp from the carriage row of vehicles-v2.webp.
+"""Builds the premium wagon liveries from the carriage row of vehicles-v2.webp.
 
-Each skin repaints the original carriage region by region (roof, body, chassis, brass trim,
-window panes) in HLS space so the painted shading and outlines survive, then paints a
-pattern (dragon scales, galaxy stars, blossoms, candy stripes...) into a region, shaded by
-the original lighting. Roof accessories and animated effects are drawn in-game
-(dist/js/skin-effects.js).
+Outputs
+  dist/assets/wagon-skins.webp  painted carriages (10 rows x 4 directions)
+  dist/assets/wagon-glow.webp   their emissive light (neon trim, lit windows, lava, stars) at half size, with a
+                                pre-blurred halo so the game adds it with 'lighter' and no runtime blur
+  dist/js/skin-glints.js        bright paint points where in-game sparkles appear
+
+Each region of the original art (roof, body, chassis, brass trim, window panes) is repainted in HLS
+space so the original toy shading survives. Materials add gloss (a sharper highlight roll-off) or a
+metal response (reflection bands along the shading), so the finish reads as lacquer, gold or chrome
+instead of flat colour. The moving sheen and twinkles are added in-game (dist/js/skin-effects.js),
+clipped to the carriage silhouette.
 Run: python3 scripts/build-wagon-skins.py  (needs Pillow)
 """
 import colorsys, json, math, pathlib, random, sys
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter, ImageChops
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SOURCE = ROOT / 'dist/assets/vehicles-v2.webp'
 OUT = ROOT / 'dist/assets/wagon-skins.webp'
+GLOW = ROOT / 'dist/assets/wagon-glow.webp'
 # Carriage crops from renderer.js VEHICLES[4..7]: right-down, left-down, left-up, right-up.
 CROPS = [(35, 586, 328, 338), (423, 586, 326, 340), (801, 583, 322, 344), (1189, 581, 320, 344)]
 SCALE = 0.72
 CELL_W, CELL_H = round(330 * SCALE), round(346 * SCALE)
 
-# Mean colours of each region in the original art; recolouring is relative to these.
 REFERENCE = {'roof': (196, 86, 62), 'body': (236, 220, 172), 'chassis': (22, 100, 92), 'brass': (190, 150, 70), 'window': (44, 64, 70)}
 
 def hex_rgb(value):
     value = value.lstrip('#')
     return tuple(int(value[i:i + 2], 16) for i in (0, 2, 4))
 
-# Order is the in-game order (rows 0..9, see dist/js/cosmetics.js).
+# region: (colour, finish). Finishes: 'gloss' lacquer, 'metal' polished metal, 'matte'.
+# glow: [(source, colour, strength)] where source is a region or a procedural pattern.
 SKINS = [
-    {'id': 'dragon', 'colors': {'roof': '#1f5d3a', 'body': '#3fae5a', 'chassis': '#5a1f1f', 'brass': '#f2b43a', 'window': '#ffb347'},
-     'patterns': [('body', 'scales', '#1f6b35', 0.85), ('roof', 'scales', '#13402a', 0.6)]},
-    {'id': 'unicorn', 'colors': {'roof': '#f4b8e4', 'body': '#fff8ff', 'chassis': '#c9a7f5', 'brass': '#f7d36a'},
-     'patterns': [('body', 'stars', '#e27fd0', 1.0)]},
-    {'id': 'galaxy', 'colors': {'roof': '#1b1446', 'body': '#3a2a8c', 'chassis': '#120c2e', 'brass': '#9ff0ff', 'window': '#7ff6ff'},
-     'gradient': ('body', '#5b2fb8', '#1f4fb5'), 'patterns': [('body', 'stars', '#ffffff', 1.0), ('roof', 'stars', '#d8c9ff', 0.8)]},
-    {'id': 'halloween', 'colors': {'roof': '#5b2a86', 'body': '#f28a1e', 'chassis': '#1d1824', 'brass': '#9be35a', 'window': '#b6ff5c'},
-     'patterns': [('body', 'bats', '#1d1226', 1.0), ('roof', 'stars', '#f7c35a', 0.8)]},
-    {'id': 'icequeen', 'colors': {'roof': '#eaf7ff', 'body': '#9fd8f5', 'chassis': '#5f86b8', 'brass': '#ffffff', 'window': '#d9fbff'},
-     'gradient': ('body', '#8cc8f2', '#4f86d6'), 'patterns': [('body', 'snowflakes', '#ffffff', 1.0), ('roof', 'snowflakes', '#9fd2f5', 0.8)]},
-    {'id': 'sakura', 'colors': {'roof': '#f290b4', 'body': '#fff6f8', 'chassis': '#b34b74', 'brass': '#f2c45a'},
-     'patterns': [('body', 'blossoms', '#ec5f95', 1.0), ('roof', 'blossoms', '#fff0f5', 0.9)]},
-    {'id': 'mermaid', 'colors': {'roof': '#1aa6a6', 'body': '#46d1c3', 'chassis': '#244e8c', 'brass': '#ffe08a'},
-     'gradient': ('body', '#58e0c9', '#5a8fe6'), 'patterns': [('body', 'scales', '#e9fffb', 0.85), ('roof', 'dots', '#bff7ef', 0.7)]},
-    {'id': 'royal', 'colors': {'roof': '#7a1430', 'body': '#2b2420', 'chassis': '#14100d', 'brass': '#ffd25a', 'window': '#ffe9a6'},
-     'patterns': [('body', 'diamonds', '#ffcf4d', 1.0), ('roof', 'diamonds', '#f2c45a', 0.8)]},
-    {'id': 'candy', 'colors': {'roof': '#fff7fb', 'body': '#ffc2dc', 'chassis': '#62c9b4', 'brass': '#ffffff'},
-     'patterns': [('body', 'stripes', '#ff7fb0', 0.9), ('roof', 'sprinkles', None, 1.0)]},
-    {'id': 'firefly', 'colors': {'roof': '#4e8b3a', 'body': '#c08a52', 'chassis': '#3a2b1c', 'brass': '#d8c46a', 'window': '#fff1a1'},
-     'patterns': [('body', 'leaves', '#3f8f32', 1.0), ('roof', 'leaves', '#2f6b28', 0.8)]},
+    {'id': 'gold', 'regions': {'roof': ('#221c18', 'gloss'), 'body': ('#d9a228', 'metal'), 'chassis': ('#1c1714', 'gloss'), 'brass': ('#fff1b8', 'metal'), 'window': ('#ffe7a0', 'lit')},
+     'glow': [('window', '#ffd66b', 0.9)]},
+    {'id': 'neon', 'regions': {'roof': ('#141a33', 'gloss'), 'body': ('#1b2148', 'gloss'), 'chassis': ('#0b0f22', 'gloss'), 'brass': ('#4ff3ff', 'lit'), 'window': ('#b49bff', 'lit')},
+     'lines': [('underline', '#5ff6ff'), ('roofline', '#ff6ad8')], 'glow': [('underline', '#2ef0ff', 1.0), ('roofline', '#ff4fd1', 1.0), ('brass', '#38f2ff', 0.7), ('window', '#9b7bff', 0.7)]},
+    {'id': 'rosegold', 'regions': {'roof': ('#5a3036', 'gloss'), 'body': ('#d98c74', 'metal'), 'chassis': ('#6b3b3a', 'gloss'), 'brass': ('#fff3ea', 'metal'), 'window': ('#ffe3d6', 'lit')},
+     'glow': [('window', '#ffd2bf', 0.6)]},
+    {'id': 'lava', 'regions': {'roof': ('#2a2120', 'matte'), 'body': ('#3b2622', 'matte'), 'chassis': ('#171110', 'matte'), 'brass': ('#ff7a1a', 'lit'), 'window': ('#ff9a2e', 'lit')},
+     'cracks': '#ffe08a', 'glow': [('cracks', '#ff5a00', 1.0), ('roofline', '#ff3d00', 0.55), ('brass', '#ff7a1a', 0.7), ('window', '#ff7a1a', 0.8)]},
+    {'id': 'emerald', 'regions': {'roof': ('#0f3d2a', 'gloss'), 'body': ('#178a52', 'gloss'), 'chassis': ('#0b2a1d', 'gloss'), 'brass': ('#ffd977', 'metal'), 'window': ('#fff0b8', 'lit')},
+     'lines': [('underline', '#ffd25a')], 'glow': [('window', '#ffe08a', 0.7)]},
+    {'id': 'ruby', 'regions': {'roof': ('#2a0d14', 'gloss'), 'body': ('#c1122f', 'gloss'), 'chassis': ('#1a0a0e', 'gloss'), 'brass': ('#ffd25a', 'metal'), 'window': ('#ffe9b0', 'lit')},
+     'lines': [('underline', '#ffd25a'), ('roofline', '#ffd25a')], 'glow': [('window', '#ffcf6b', 0.8)]},
+    {'id': 'pearl', 'regions': {'roof': ('#f7f2ff', 'gloss'), 'body': ('#fbf7ff', 'pearl'), 'chassis': ('#8f78c4', 'gloss'), 'brass': ('#f1e6ff', 'metal'), 'window': ('#e9dcff', 'lit')},
+     'lines': [('underline', '#d9c6ff')], 'glow': [('window', '#e2d2ff', 0.55)]},
+    {'id': 'galaxy', 'regions': {'roof': ('#120d33', 'gloss'), 'body': ('#2d1f73', 'nebula'), 'chassis': ('#0a0820', 'gloss'), 'brass': ('#bfe9ff', 'metal'), 'window': ('#8ff6ff', 'lit')},
+     'stars': '#ffffff', 'glow': [('stars', '#cfe8ff', 1.0), ('window', '#5be7ff', 0.8)]},
+    {'id': 'frost', 'regions': {'roof': ('#f2fbff', 'gloss'), 'body': ('#86cdf2', 'gloss'), 'chassis': ('#4d7fb3', 'gloss'), 'brass': ('#ffffff', 'metal'), 'window': ('#d6fbff', 'lit')},
+     'lines': [('roofline', '#e8fbff')], 'glow': [('window', '#a6f3ff', 0.75), ('roofline', '#c8f7ff', 0.6)]},
+    {'id': 'halloween', 'regions': {'roof': ('#3d1a5c', 'gloss'), 'body': ('#f07a12', 'gloss'), 'chassis': ('#140f18', 'gloss'), 'brass': ('#9cff57', 'lit'), 'window': ('#b6ff5c', 'lit')},
+     'lines': [('underline', '#b06bff')], 'glow': [('window', '#8dff3a', 1.0), ('underline', '#9b4dff', 0.8), ('brass', '#7dff3a', 0.6)]},
 ]
 
 def classify(r, g, b):
     h, l, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
     deg = h * 360
     if l < 0.11:
-        return None  # tyres, deep outlines
+        return None
     if (deg < 28 or deg > 340) and s > 0.28:
         return 'roof'
     if 150 <= deg <= 215 and s >= 0.33:
@@ -63,19 +70,6 @@ def classify(r, g, b):
     if 25 <= deg <= 62:
         return 'brass' if s >= 0.42 and l < 0.6 else 'body'
     return None
-
-def remap(r, g, b, region, target):
-    h, l, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
-    rh, rl, rs = colorsys.rgb_to_hls(*(c / 255 for c in REFERENCE[region]))
-    th, tl, ts = colorsys.rgb_to_hls(*(c / 255 for c in target))
-    # Lightness keeps the painted shading: below the reference it scales, above it eases toward white.
-    nl = tl * l / rl if l <= rl else tl + (1 - tl) * (l - rl) / max(1e-6, 1 - rl)
-    ns = min(1, ts * (s / rs if rs > 0.05 else 1))
-    if region == 'window' and tl > 0.5:
-        # Lit windows: an even glow with a hint of the original reflections.
-        nl = min(0.9, tl + 0.12 * (l / rl - 1))
-    nr, ng, nb = colorsys.hls_to_rgb(th, max(0, min(1, nl)), ns)
-    return round(nr * 255), round(ng * 255), round(nb * 255)
 
 def regions(crop):
     """Per-pixel regions. Dark slate components touching the silhouette are tyres; small ones are coupler shadows."""
@@ -98,141 +92,202 @@ def regions(crop):
                     elif grid[ny][nx] == 'window' and not seen[ny][nx]:
                         seen[ny][nx] = True
                         stack.append((nx, ny))
-            # Tyres reach the sprite's silhouette and coupler shadows are small; panes are large and enclosed.
             if len(part) < 600 or outside:
                 for x, y in part:
                     grid[y][x] = None
     return grid
 
-def stamp_layer(kind, color, size, seed):
-    """Pattern drawn at 2x for anti-aliasing, returned at crop size."""
-    W, H = size
+def shade(l, rl, tl, finish, x, y, W, H):
+    """Maps the original lightness l (region reference rl) to a new lightness around target tl."""
+    rel = l / rl
+    if finish == 'metal':
+        return metal_input(rel, x, y, W, H)
+    if finish == 'gloss':
+        # Lacquer: rich mid tones and a crisp specular roll-off in the lit areas.
+        v = tl * rel if rel <= 1 else tl + (1 - tl) * min(1, (rel - 1) * 2.4)
+        return min(0.96, max(0.03, v))
+    if finish == 'matte':
+        return min(0.9, max(0.03, tl * (0.7 + 0.3 * rel)))
+    return min(1, max(0, tl * rel if l <= rl else tl + (1 - tl) * (l - rl) / max(1e-6, 1 - rl)))
+
+def metal_input(rel, x, y, W, H):
+    # Polished metal: the form's shading plus reflection bands, read through a colour ramp below.
+    # Two broad diagonal reflections across the body, like a studio light on a polished toy.
+    band = 0.5 + 0.5 * math.sin((x / W * 1.7 - y / H * 0.9) * math.tau + rel * 2.2)
+    return max(0, min(1, 0.42 * rel + 0.62 * band - 0.1))
+
+def metal_ramp(t, th, tl, ts):
+    # Highlights stay in the metal's own hue; only the very top of the ramp turns near white.
+    stops = [(0, 0.08, ts), (0.4, tl * 0.78, ts), (0.68, min(0.78, tl + 0.14), ts), (0.88, min(0.88, tl + 0.3), ts * 0.9), (1, 0.95, ts * 0.6)]
+    for (a, la, sa), (b, lb, sb) in zip(stops, stops[1:]):
+        if t <= b:
+            f = (t - a) / (b - a)
+            return colorsys.hls_to_rgb(th, la + (lb - la) * f, sa + (sb - sa) * f)
+    return colorsys.hls_to_rgb(th, 0.95, ts * 0.6)
+
+def recolour(r, g, b, region, colour, finish, x, y, W, H):
+    h, l, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
+    rh, rl, rs = colorsys.rgb_to_hls(*(c / 255 for c in REFERENCE[region]))
+    th, tl, ts = colorsys.rgb_to_hls(*(c / 255 for c in colour))
+    if finish == 'lit':
+        # Self-lit parts: even, bright and saturated, with a hint of the original reflections.
+        return tuple(round(v * 255) for v in colorsys.hls_to_rgb(th, min(0.8, tl * 0.92 + 0.1 * (l / rl - 1)), min(1, ts * 1.1)))
+    if finish == 'pearl':
+        # Mother of pearl: soft pink to lilac to ice-blue drift across the form, very light.
+        t = (x / W) * 0.7 + (y / H) * 0.5 + (l / rl) * 0.4
+        th = (0.86 + 0.18 * math.sin(t * 3.1)) % 1
+        ts, tl = 0.55, 0.9
+        return tuple(round(v * 255) for v in colorsys.hls_to_rgb(th, shade(l, rl, tl, 'gloss', x, y, W, H), ts))
+    if finish == 'nebula':
+        # Deep space: violet to blue to magenta clouds.
+        t = math.sin(x / W * 5 + y / H * 3) * 0.5 + math.sin(x / W * 11 - y / H * 7) * 0.25
+        th = (0.72 + 0.08 * t) % 1
+        return tuple(round(v * 255) for v in colorsys.hls_to_rgb(th, shade(l, rl, 0.24 + 0.08 * t, 'gloss', x, y, W, H), 0.75))
+    if finish == 'metal':
+        return tuple(round(v * 255) for v in metal_ramp(metal_input(l / rl, x, y, W, H), th, tl, ts))
+    ns = min(1, ts * (s / rs if rs > 0.05 else 1))
+    return tuple(round(v * 255) for v in colorsys.hls_to_rgb(th, shade(l, rl, tl, finish, x, y, W, H), ns))
+
+def crack_mask(W, H, seed):
+    """Branching lava fissures across the body."""
     k = 2
-    layer = Image.new('RGBA', (W * k, H * k), (0, 0, 0, 0))
-    d = ImageDraw.Draw(layer)
+    m = Image.new('L', (W * k, H * k), 0)
+    d = ImageDraw.Draw(m)
     rnd = random.Random(seed)
-    c = hex_rgb(color) + (255,) if color else None
-    if kind == 'scales':
-        r = 15 * k
-        for row, y in enumerate(range(0, H * k + r, int(r * 0.9))):
-            for x in range(-r, W * k + r, 2 * r):
-                cx = x + (r if row % 2 else 0)
-                d.arc((cx - r, y - r, cx + r, y + r), 20, 160, fill=c, width=4 * k)
-    elif kind == 'stars':
-        for _ in range(int(W * H / 260)):
-            x, y, s = rnd.uniform(0, W * k), rnd.uniform(0, H * k), rnd.uniform(2.5, 6.5) * k
-            d.polygon([(x, y - s), (x + s * 0.28, y - s * 0.28), (x + s, y), (x + s * 0.28, y + s * 0.28), (x, y + s), (x - s * 0.28, y + s * 0.28), (x - s, y), (x - s * 0.28, y - s * 0.28)], fill=c)
-    elif kind == 'dots':
-        step = 15 * k
-        for row, y in enumerate(range(0, H * k, step)):
-            for x in range((row % 2) * step // 2, W * k, step):
-                r = 2.6 * k
-                d.ellipse((x - r, y - r, x + r, y + r), fill=c)
-    elif kind == 'blossoms':
-        step = 36 * k
-        for row, y in enumerate(range(8 * k, H * k, step)):
-            for x in range((row % 2) * step // 2, W * k, step):
-                x2, y2, r = x + rnd.uniform(-5, 5) * k, y + rnd.uniform(-5, 5) * k, 6.5 * k
-                for i in range(5):
-                    a = i * math.tau / 5 + rnd.random()
-                    px_, py_ = x2 + math.cos(a) * r, y2 + math.sin(a) * r
-                    d.ellipse((px_ - r * 0.8, py_ - r * 0.8, px_ + r * 0.8, py_ + r * 0.8), fill=c)
-                d.ellipse((x2 - r * 0.45, y2 - r * 0.45, x2 + r * 0.45, y2 + r * 0.45), fill=(255, 226, 120, 255))
-    elif kind == 'snowflakes':
-        step = 40 * k
-        for row, y in enumerate(range(10 * k, H * k, step)):
-            for x in range((row % 2) * step // 2, W * k, step):
-                s = rnd.uniform(9, 12) * k
-                for i in range(3):
-                    a = i * math.pi / 3
-                    d.line((x - math.cos(a) * s, y - math.sin(a) * s, x + math.cos(a) * s, y + math.sin(a) * s), fill=c, width=int(2.6 * k))
-                d.ellipse((x - 1.6 * k, y - 1.6 * k, x + 1.6 * k, y + 1.6 * k), fill=c)
-    elif kind == 'bats':
-        step = 40 * k
-        for row, y in enumerate(range(14 * k, H * k, int(step * 0.8))):
-            for x in range((row % 2) * step // 2, W * k, step):
-                s = 10 * k
-                d.polygon([(x, y - s * 0.2), (x - s * 0.5, y - s * 0.7), (x - s * 1.4, y - s * 0.5), (x - s * 1.1, y), (x - s * 0.7, y - s * 0.1), (x - s * 0.4, y + s * 0.3),
-                           (x, y + s * 0.1), (x + s * 0.4, y + s * 0.3), (x + s * 0.7, y - s * 0.1), (x + s * 1.1, y), (x + s * 1.4, y - s * 0.5), (x + s * 0.5, y - s * 0.7)], fill=c)
-    elif kind == 'diamonds':
-        step = 28 * k
-        for row, y in enumerate(range(0, H * k, step)):
-            for x in range((row % 2) * step // 2, W * k, step):
-                s = 7 * k
-                d.polygon([(x, y - s), (x + s * 0.6, y), (x, y + s), (x - s * 0.6, y)], outline=c, width=int(2.2 * k))
-                d.ellipse((x - 1.4 * k, y - 1.4 * k, x + 1.4 * k, y + 1.4 * k), fill=c)
-    elif kind == 'stripes':
-        step = 22 * k
-        for x in range(0, W * k, step):
-            d.rectangle((x, 0, x + step * 0.45, H * k), fill=c)
-    elif kind == 'sprinkles':
-        palette = [(255, 107, 157), (110, 207, 246), (255, 214, 74), (139, 225, 133), (186, 140, 255)]
-        for _ in range(int(W * H / 140)):
-            x, y, a = rnd.uniform(0, W * k), rnd.uniform(0, H * k), rnd.uniform(0, math.pi)
-            s = 4.2 * k
-            d.line((x - math.cos(a) * s, y - math.sin(a) * s, x + math.cos(a) * s, y + math.sin(a) * s), fill=rnd.choice(palette) + (255,), width=int(2.6 * k))
-    elif kind == 'leaves':
-        step = 30 * k
-        for row, y in enumerate(range(8 * k, H * k, int(step * 0.75))):
-            for x in range((row % 2) * step // 2, W * k, step):
-                s = rnd.uniform(9, 11) * k
-                leaf = Image.new('RGBA', (int(s * 2), int(s * 2)), (0, 0, 0, 0))
-                ImageDraw.Draw(leaf).ellipse((s * 0.55, 0, s * 1.45, s * 2), fill=c)
-                leaf = leaf.rotate(rnd.uniform(-60, 60), resample=Image.BICUBIC)
-                layer.alpha_composite(leaf, (int(x - s), int(y - s)))
-    return layer.resize((W, H), Image.LANCZOS)
+    for _ in range(11):
+        x, y, a = rnd.uniform(0, W * k), rnd.uniform(0, H * k), rnd.uniform(0, math.tau)
+        width = 5 * k
+        for _ in range(rnd.randint(8, 14)):
+            a += rnd.uniform(-0.7, 0.7)
+            nx, ny = x + math.cos(a) * 9 * k, y + math.sin(a) * 9 * k
+            d.line((x, y, nx, ny), fill=255, width=max(1, int(width)))
+            if rnd.random() < 0.25:
+                b = a + rnd.choice((-1, 1)) * rnd.uniform(0.6, 1.2)
+                d.line((nx, ny, nx + math.cos(b) * 12 * k, ny + math.sin(b) * 12 * k), fill=200, width=max(1, int(width * 0.6)))
+            x, y, width = nx, ny, max(1.2 * k, width * 0.93)
+    return m.resize((W, H), Image.LANCZOS)
+
+def star_mask(W, H, seed):
+    k = 2
+    m = Image.new('L', (W * k, H * k), 0)
+    d = ImageDraw.Draw(m)
+    rnd = random.Random(seed)
+    for _ in range(int(W * H / 240)):
+        x, y = rnd.uniform(0, W * k), rnd.uniform(0, H * k)
+        r = rnd.choice((0.9, 1.1, 1.4, 2.4)) * k
+        d.ellipse((x - r, y - r, x + r, y + r), fill=255)
+        if r > 2 * k:
+            d.line((x - r * 2.6, y, x + r * 2.6, y), fill=200, width=k)
+            d.line((x, y - r * 2.6, x, y + r * 2.6), fill=200, width=k)
+    return m.resize((W, H), Image.LANCZOS)
 
 def paint(crop, skin, seed):
-    out = crop.copy()
-    px = out.load()
+    W, H = crop.size
+    base = crop.copy()
+    px = base.load()
     grid = regions(crop)
-    W, H = out.size
-    targets = {k: hex_rgb(v) for k, v in skin['colors'].items()}
-    gradient = skin.get('gradient')
     for y in range(H):
         for x in range(W):
             r, g, b, a = px[x, y]
             region = grid[y][x]
-            if not a or region not in targets:
-                continue
-            target = targets[region]
-            if gradient and region == gradient[0]:
-                t = min(1, max(0, (x / W) * 0.6 + (y / H) * 0.4))
-                c1, c2 = hex_rgb(gradient[1]), hex_rgb(gradient[2])
-                target = tuple(round(c1[i] + (c2[i] - c1[i]) * t) for i in range(3))
-            if skin.get('rainbow') == region:
-                hue = ((x + y * 0.6) / (W * 0.55)) % 1
-                target = tuple(round(v * 255) for v in colorsys.hls_to_rgb(hue, 0.78, 0.85))
-            px[x, y] = (*remap(r, g, b, region, target), a)
-    # Patterns follow the original lighting: darker where the paint was in shadow.
-    for index, (region, kind, color, strength) in enumerate(skin.get('patterns', [])):
-        layer = stamp_layer(kind, color, (W, H), seed * 31 + index).load()
-        ref_l = colorsys.rgb_to_hls(*(c / 255 for c in REFERENCE[region]))[1]
-        src = crop.load()
+            if a and region in skin['regions']:
+                colour, finish = skin['regions'][region]
+                px[x, y] = (*recolour(r, g, b, region, hex_rgb(colour), finish, x, y, W, H), a)
+    alpha = crop.getchannel('A')
+    sources = {}
+    for region in ('window', 'brass', 'body', 'roof'):
+        m = Image.new('L', (W, H), 0)
+        mp = m.load()
         for y in range(H):
             for x in range(W):
-                if grid[y][x] != region:
-                    continue
-                lr, lg, lb, la = layer[x, y]
-                if not la:
-                    continue
-                l = colorsys.rgb_to_hls(*(c / 255 for c in src[x, y][:3]))[1]
-                shade = max(0.55, min(1.2, l / ref_l))
-                alpha = la / 255 * strength
-                r, g, b, a = px[x, y]
-                px[x, y] = (round(r + (min(255, lr * shade) - r) * alpha), round(g + (min(255, lg * shade) - g) * alpha), round(b + (min(255, lb * shade) - b) * alpha), a)
-    return out
+                if grid[y][x] == region:
+                    mp[x, y] = 255
+        sources[region] = m
+    body = sources['body']
+    # Livery lines follow the carriage's real edges: the roof edge and the bottom of the body above the chassis.
+    near = lambda m, size: m.filter(ImageFilter.MaxFilter(size))
+    chassis = Image.new('L', (W, H), 0)
+    cp = chassis.load()
+    for y in range(H):
+        for x in range(W):
+            if grid[y][x] == 'chassis':
+                cp[x, y] = 255
+    sources['underline'] = ImageChops.multiply(body, near(chassis, 7))
+    sources['roofline'] = ImageChops.multiply(body, near(sources['roof'], 5))
+    for source, colour in skin.get('lines', []):
+        rgb = hex_rgb(colour)
+        lp, mp = base.load(), sources[source].load()
+        for y in range(H):
+            for x in range(W):
+                if mp[x, y] > 40:
+                    r, g, b, a = lp[x, y]
+                    l = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)[1]
+                    t = mp[x, y] / 255
+                    lit = metal_ramp(min(1, 0.45 + l * 0.7), *colorsys.rgb_to_hls(*(c / 255 for c in rgb)))
+                    lp[x, y] = tuple(round(lp[x, y][i] + (lit[i] * 255 - lp[x, y][i]) * t) for i in range(3)) + (a,)
+    if 'cracks' in skin:
+        cracks = ImageChops.multiply(crack_mask(W, H, seed), body)
+        sources['cracks'] = cracks
+        hot = Image.new('RGBA', (W, H), hex_rgb(skin['cracks']) + (255,))
+        base.paste(hot, (0, 0), cracks)
+    if 'stars' in skin:
+        stars = ImageChops.multiply(star_mask(W, H, seed), ImageChops.lighter(body, sources['roof']))
+        sources['stars'] = stars
+        base.paste(Image.new('RGBA', (W, H), hex_rgb(skin['stars']) + (255,)), (0, 0), stars)
+    # Emissive layer: a sharp core plus a soft halo. Window light stays on the carriage; neon, lava and
+    # stars may bloom a few pixels past the edge, never into a fog around it.
+    glow = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    inside = crop.getchannel('A').point(lambda v: 255 if v > 128 else 0)
+    bloom = inside.filter(ImageFilter.MaxFilter(7)).filter(ImageFilter.GaussianBlur(2))
+    for source, colour, strength in skin['glow']:
+        mask = sources[source]
+        rgb = hex_rgb(colour)
+        soft = source == 'window'
+        halo = mask.filter(ImageFilter.GaussianBlur(4 if soft else 6)).point(lambda v: min(255, int(v * (0.7 if soft else 1.5) * strength)))
+        halo = ImageChops.multiply(halo, inside if soft else bloom)
+        core = mask.point(lambda v: int(v * (0.15 if soft else 0.55) * strength))
+        glow = Image.alpha_composite(glow, Image.merge('RGBA', (*[Image.new('L', (W, H), c) for c in rgb], halo)))
+        glow = Image.alpha_composite(glow, Image.merge('RGBA', (*[Image.new('L', (W, H), c) for c in rgb], core)))
+    del alpha
+    return base, glow, glints(base, grid, seed)
+
+def glints(base, grid, seed):
+    """Where light catches the paint: up to 7 well-spaced bright points, normalised to the crop."""
+    W, H = base.size
+    px = base.load()
+    cands = []
+    for y in range(0, H, 2):
+        for x in range(0, W, 2):
+            if grid[y][x] in ('body', 'roof', 'brass') and px[x, y][3] > 250:
+                r, g, b, _ = px[x, y]
+                cands.append((max(r, g, b) + min(r, g, b), x, y))
+    cands.sort(reverse=True)
+    picked = []
+    for _, x, y in cands[:max(40, len(cands) // 12)]:
+        if all((x - u) ** 2 + (y - v) ** 2 > (W * 0.14) ** 2 for u, v in picked):
+            picked.append((x, y))
+        if len(picked) == 7:
+            break
+    return [[round(x / W, 3), round(y / H, 3)] for x, y in picked]
 
 def main():
     atlas = Image.open(SOURCE).convert('RGBA')
     sheet = Image.new('RGBA', (CELL_W * 4, CELL_H * len(SKINS)), (0, 0, 0, 0))
+    glows = Image.new('RGBA', sheet.size, (0, 0, 0, 0))
     rects = [[d * CELL_W, 0, round(w * SCALE), round(h * SCALE)] for d, (x, y, w, h) in enumerate(CROPS)]
+    points = {}
     for row, skin in enumerate(SKINS):
         for d, (x, y, w, h) in enumerate(CROPS):
-            art = paint(atlas.crop((x, y, x + w, y + h)), skin, row * 4 + d).resize((round(w * SCALE), round(h * SCALE)), Image.LANCZOS)
-            sheet.alpha_composite(art, (d * CELL_W, row * CELL_H))
+            base, glow, spots = paint(atlas.crop((x, y, x + w, y + h)), skin, row * 4 + d)
+            points.setdefault(skin['id'], []).append(spots)
+            size = (round(w * SCALE), round(h * SCALE))
+            sheet.alpha_composite(base.resize(size, Image.LANCZOS), (d * CELL_W, row * CELL_H))
+            glows.alpha_composite(glow.resize(size, Image.LANCZOS), (d * CELL_W, row * CELL_H))
         print('painted', skin['id'], file=sys.stderr)
-    sheet.save(OUT, 'WEBP', quality=88, method=6)
+    sheet.save(OUT, 'WEBP', quality=90, method=6)
+    # The glow is soft by nature; half resolution is enough and the game scales it back up.
+    glows.resize((glows.width // 2, glows.height // 2), Image.LANCZOS).save(GLOW, 'WEBP', quality=85, method=6)
+    (ROOT / 'dist/js/skin-glints.js').write_text('/** Generated by scripts/build-wagon-skins.py: bright paint points per skin and direction, normalised to the sprite. */\nexport const GLINTS=' + json.dumps(points, separators=(',', ':')) + ';\n', encoding='utf8')
     print(json.dumps({'cell': [CELL_W, CELL_H], 'rects': rects, 'skins': [s['id'] for s in SKINS], 'size': sheet.size}))
 
 if __name__ == '__main__':

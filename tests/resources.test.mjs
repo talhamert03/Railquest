@@ -11,7 +11,7 @@ test('a missing required image rejects loading and never reports complete; retry
  const progress=[];
  await assert.rejects(prepareResources(p=>progress.push(p),{imageLoader:async src=>{if(src.includes('props-v2'))throw new Error('offline');return {};},fontLoader:async()=>{}}),/offline/);
  assert.ok(progress.every(p=>p.completed<p.total));
- const art=await prepareResources(()=>{},{imageLoader:async()=>({}),fontLoader:async()=>{}});assert.equal(Object.keys(art).length,7);
+ const art=await prepareResources(()=>{},{imageLoader:async()=>({}),fontLoader:async()=>{}});assert.equal(Object.keys(art).length,8);
 });
 test('a null decoder result cannot produce a successful game boot',async()=>{
  await assert.rejects(prepareResources(()=>{},{imageLoader:async()=>null,fontLoader:async()=>{}}));
