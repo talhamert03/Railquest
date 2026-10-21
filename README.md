@@ -2,6 +2,13 @@
 
 Telefon ve tablet için yalnız yatay tasarlanan özgün tren bulmacası. 58 bölüm, altı bölge, sınırlı ray bütçesi, altıya kadar numaralı vagon, ortak hatlar, köprüler, A/B/C tünelleri, bekleme peronları, sinyaller ve tek yönlü geçitler.
 
+## Railquest — 0.15.1 · Daha net görüntü
+
+- Oyun tahtası ve haritalar telefonun kendi piksel yoğunluğunda (3x'e kadar) çizilir; eskiden 2x'te sabitlenip büyütülüyordu. Yavaş cihazlar en fazla 2x'e iner (eskiden 1,25x).
+- Zemin önbelleği tam piksel hizasında kopyalanır, yarım piksel kaymasından gelen yumuşama yok. Görseller yüksek kaliteli küçültmeyle çizilir.
+- Ana menü adası 1536 piksel ve sabit; kayma animasyonu görüntüyü bulanıklaştırdığı için kaldırıldı.
+- Android sürüm kodu 19.
+
 ## Railquest — 0.15.0 · İngilizce
 
 Oyun iki dillidir: telefonun dili Türkçe ise Türkçe, başka herhangi bir dil ise İngilizce açılır (`dist/js/i18n.js`). Menüler, pencereler, ipuçları, 58 bölüm adı, 6 bölge, vagonlar, anahtarlar, yükleme ve döndürme ekranı çevrildi. Play paket kimliği `com.railquest.game`. Android sürüm kodu 18.
@@ -155,7 +162,7 @@ node scripts/check.mjs
 
 ## Android
 
-Android kaynak projesi 0.15.0 / versionCode 18 ve `sensorLandscape` kullanır. Gradle wrapper kaynaklara dahildir. Debug APK derleme ve imza kontrolleri `docs/RELEASE-READINESS.md` içinde kayıtlıdır. Gerçek Galaxy A36, tarayıcı CSS yerleşimi ve Play reklam/ödeme kabul testi henüz yapılmadı. Android Studio kurulum ayrıntıları `android/README.md` içindedir.
+Android kaynak projesi 0.15.1 / versionCode 19 ve `sensorLandscape` kullanır. Gradle wrapper kaynaklara dahildir. Debug APK derleme ve imza kontrolleri `docs/RELEASE-READINESS.md` içinde kayıtlıdır. Gerçek Galaxy A36, tarayıcı CSS yerleşimi ve Play reklam/ödeme kabul testi henüz yapılmadı. Android Studio kurulum ayrıntıları `android/README.md` içindedir.
 
 ## Görseller
 

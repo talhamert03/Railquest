@@ -102,7 +102,7 @@ button:focus-visible,canvas:focus-visible,summary:focus-visible,input:focus-visi
 .cloud:nth-child(3){top:70%;transform:scale(.85);animation-duration:72s;animation-delay:-30s;opacity:.6}
 .cloud:nth-child(4){top:56%;transform:scale(.55);animation-duration:95s;animation-delay:-70s;opacity:.5}
 .menu-scene{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
-.menu-scene img{position:absolute;top:50%;left:68%;height:116%;width:auto;max-width:none;transform:translate(-50%,-50%);-webkit-mask-image:radial-gradient(ellipse closest-side,#000 70%,transparent 100%);mask-image:radial-gradient(ellipse closest-side,#000 70%,transparent 100%);animation:island-drift 7s ease-in-out infinite;will-change:transform}
+.menu-scene img{position:absolute;top:50%;left:68%;height:116%;width:auto;max-width:none;transform:translate(-50%,-50%);-webkit-mask-image:radial-gradient(ellipse closest-side,#000 70%,transparent 100%);mask-image:radial-gradient(ellipse closest-side,#000 70%,transparent 100%);}
 .menu-crown{position:relative;z-index:2;display:flex;align-items:flex-start;gap:10px}
 .menu-score{display:flex;align-items:center;gap:12px;min-height:var(--touch);padding:6px 14px;margin-left:4px;border-radius:18px;background:#fff8e6e6;border:2px solid #fffdf2;box-shadow:0 4px 0 #8aa38a55}
 .menu-score>span{display:flex;align-items:center;gap:6px;font-size:16px}
@@ -466,7 +466,6 @@ summary{cursor:pointer;padding:8px 2px;font-weight:600}
 @keyframes pulse-sun{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes gain{0%{transform:scale(1)}40%{transform:scale(1.15)}100%{transform:scale(1)}}
 @keyframes float-y{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-@keyframes island-drift{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,calc(-50% - 6px))}}
 @keyframes cloud-drift{from{translate:-140px 0}to{translate:calc(100vw + 40px) 0}}
 @keyframes letter-bob{0%,70%,100%{transform:translateY(0)}35%{transform:translateY(-5px)}}
 @keyframes shine{0%,55%{transform:translateX(-150%) skewX(-18deg)}85%,100%{transform:translateX(330%) skewX(-18deg)}}

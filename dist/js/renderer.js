@@ -10,8 +10,8 @@ import {SKIN_RECTS,skinById} from './cosmetics.js';
 import {drawSkinnedCar} from './skin-effects.js';
 const RECT={tree:[31,54,332,402],pine:[402,33,356,425],stones:[819,191,326,263],flowers:[1208,224,304,209],tunnelE:[10,554,368,371],tunnelS:[401,553,367,371],station:[772,559,516,393],sign:[1311,538,179,407]};
 const VEHICLES=[[30,79,344,370],[409,79,340,370],[791,85,332,370],[1185,82,333,367],[35,586,328,338],[423,586,326,340],[801,583,322,344],[1189,581,320,344]];
-/** Canvas resolution budget, shared by every board. Lowered once if a device cannot keep up. */
-const QUALITY={cap:2,floor:1.25,pixels:2200000};
+/** Canvas resolution budget, shared by every board: the screen's own density up to 3x. A device that cannot keep up drops toward 2x, never lower. */
+const QUALITY={cap:3,floor:2,pixels:3800000};
 export const CAR_COLORS=['#276e86','#c97931','#9069a6','#ad5265','#53854e','#5268a3'];
 const TAU=Math.PI*2,clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 export class IslandRenderer{
@@ -81,7 +81,7 @@ export class IslandRenderer{
   this.terrainView={cx:this.cx,cy:this.cy,size:this.size};
   // Sea, atmosphere and light are static, so they live in the cache instead of being refilled every frame.
   // Biome art uses multiply against this opaque sea; a transparent backing exposes the atlases' white matte.
-  c.setTransform(this.dpr,0,0,this.dpr,0,0);c.fillStyle=w.water;c.fillRect(0,0,this.width+2*m,this.height+2*m);c.translate(m,m);
+  c.setTransform(this.dpr,0,0,this.dpr,0,0);c.imageSmoothingQuality='high';c.fillStyle=w.water;c.fillRect(0,0,this.width+2*m,this.height+2*m);c.translate(m,m);
   c.fillStyle=this.atmosphere;c.fillRect(-m,-m,this.width+2*m,this.height+2*m);
   if(this.settings.weather!==false){
    c.save();c.globalAlpha=.8;c.fillStyle=this.light;c.fillRect(-m,-m,this.width+2*m,this.height+2*m);c.restore();
@@ -279,11 +279,12 @@ export class IslandRenderer{
   const view=this.terrainView,m=this.margin;
   if(this.terrainDirty||!view||view.size!==this.size||Math.abs(this.cx-view.cx)>m||Math.abs(this.cy-view.cy)>m)this.cacheTerrain();
   const c=this.ctx,{level,state,size:s}=this,d=this.dpr;
-  c.setTransform(d,0,0,d,0,0);
+  c.setTransform(d,0,0,d,0,0);c.imageSmoothingQuality='high';
   if(!state.paused&&!state.overlay)this.motionTime=(this.motionTime||0)+Math.max(0,dt);
   const phase=this.settings.reducedMotion?0:time;
   // One opaque blit replaces the sea, light and ground passes; a pan just shifts the source window.
-  c.drawImage(this.terrain,(m-this.cx+this.terrainView.cx)*d,(m-this.cy+this.terrainView.cy)*d,this.width*d,this.height*d,0,0,this.width,this.height);
+  // Whole-pixel source offsets keep the blit 1:1, so the ground is copied sharp instead of resampled.
+  c.drawImage(this.terrain,Math.round((m-this.cx+this.terrainView.cx)*d),Math.round((m-this.cy+this.terrainView.cy)*d),this.canvas.width,this.canvas.height,0,0,this.canvas.width/d,this.canvas.height/d);
   const selected=state.routes[state.selected],tail=selected.at(-1),color=CAR_COLORS[state.selected-1];
   if(!state.journey&&!state.preview){
    for(const cell of level.cells.values())if(connectionAllowed(level,tail,cell.key))this.diamond(c,cell.x,cell.y,.85,.008,'rgba(255,250,220,.38)','rgba(62,111,76,.38)',1.1);
@@ -367,12 +368,12 @@ export class IslandRenderer{
   this.raf=requestAnimationFrame(this.frame);
  }
  measure(now){
-  // While trains run every frame is drawn; if a device averages under ~38 fps, render fewer pixels once.
+  // While trains run every frame is drawn; if a device averages under ~33 fps, render fewer pixels once.
   const gap=now-(this.lastDraw||now),p=this.perf||(this.perf={n:0,sum:0});
   if(gap<=0||gap>200){p.n=0;p.sum=0;return;}
   p.n++;p.sum+=gap;
   if(p.n<45)return;
-  const slow=p.sum/p.n>26;p.n=0;p.sum=0;
+  const slow=p.sum/p.n>30;p.n=0;p.sum=0;
   if(slow&&this.dpr>QUALITY.floor+.05){QUALITY.cap=Math.max(QUALITY.floor,this.dpr-.35);this.resize(true);}
  }
  bindInput(){

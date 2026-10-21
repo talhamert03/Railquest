@@ -1,6 +1,6 @@
 # Railquest — Android Studio paketi
 
-Sürüm 0.15.0 · versionCode 18 · paket kimliği `com.railquest.game` · 58 bölüm · 6 bölge
+Sürüm 0.15.1 · versionCode 19 · paket kimliği `com.railquest.game` · 58 bölüm · 6 bölge
 
 ## Android Studio'da aç
 
@@ -17,7 +17,7 @@ Sürüm 0.15.0 · versionCode 18 · paket kimliği `com.railquest.game` · 58 b�
 3. **release** seç → **Create**. Dosya `android/app/release/app-release.aab` olarak oluşur (Android Studio sağ altta "locate" bağlantısı verir).
 4. Bu AAB'yi Play Console → Test et ve yayınla → **Dahili test** kanalına yükle.
 
-Sonraki her güncellemede `android/app/build.gradle` içindeki `versionCode`'u bir artır (18 → 19 …).
+Sonraki her güncellemede `android/app/build.gradle` içindeki `versionCode`'u bir artır (19 → 20 …).
 
 ## Hazır olanlar
 
